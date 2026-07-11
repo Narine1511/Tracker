@@ -1,0 +1,134 @@
+//
+//  ScheduleViewController.swift
+//  Tracker
+//
+//  Created by Наринэ  Овсепян on 11.07.2026.
+//
+
+import UIKit
+/*class ScheduleCell: UITableViewCell {
+    let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 16)
+        label.textColor = .ypBlack
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+        
+    }()
+    
+    let toggleSwitch: UISwitch = {
+        let toggle = UISwitch()
+        toggle.onTintColor = .green
+        toggle.translatesAutoresizingMaskIntoConstraints = false
+        return toggle
+        
+    }()
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+         func setupUI() {
+        contentView.addSubview(titleLabel)
+        contentView.addSubview(toggleSwitch)
+    }
+}*/
+
+
+
+
+
+final class ScheduleViewController: UIViewController {
+    private let dataSchedule = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
+    private var selectedDays: [Bool] = Array(repeating: false, count: 7)
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = .ypWhite
+        
+        let label = UILabel()
+        label.text = "Расписание"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        label.tintColor = .ypBlack
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            label.heightAnchor.constraint(equalToConstant: 22),
+            label.widthAnchor.constraint(equalToConstant: 133)
+        ])
+        
+        
+        let tableView = UITableView()
+        tableView.backgroundColor = .background
+        tableView.layer.cornerRadius = 12
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(tableView)
+        
+        NSLayoutConstraint.activate([
+            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableView.heightAnchor.constraint(equalToConstant: 525),
+            tableView.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 30)
+        ])
+        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+}
+   extension ScheduleViewController: UITableViewDataSource {
+        func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+            return 7
+        }
+        func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+            cell.textLabel?.text = dataSchedule[indexPath.row]
+            cell.backgroundColor = .background
+            cell.selectionStyle = .none
+            
+            let toggleSwitch = UISwitch()
+            toggleSwitch.isOn = selectedDays[indexPath.row]
+            toggleSwitch.tag = indexPath.row
+            toggleSwitch.addTarget(self, action: #selector(switchToggled(_:)), for: .valueChanged)
+            cell.accessoryView = toggleSwitch
+        
+            return cell
+        }
+       
+       @objc func switchToggled(_ sender: UISwitch) {
+           selectedDays[sender.tag] = sender.isOn
+       }
+       
+       
+       
+        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            tableView.deselectRow(at: indexPath, animated: true)
+            selectedDays[indexPath.row].toggle()
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+            
+            switch indexPath.row {
+            case 0:
+                let categoryVC = CategoryViewController()
+                present(categoryVC, animated: true, completion: nil)
+                
+            case 1:
+                let scheduleVC = ScheduleViewController()
+                scheduleVC.title = dataSchedule[indexPath.row]
+                present(scheduleVC, animated: true, completion: nil)
+                
+            default:
+                break
+            }
+        }
+    }
+extension ScheduleViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
+}
+        
