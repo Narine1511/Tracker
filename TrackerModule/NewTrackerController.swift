@@ -7,69 +7,59 @@
 
 import UIKit
 import Foundation
+protocol NewTrackerDelegate: AnyObject {
+    func didCreateTracker(_ tracker: Tracker, category: String)
+}
 
-class NewTrackerController: UIViewController {
+final class NewTrackerController: UIViewController {
     
+    weak var delegate: NewTrackerDelegate?
+    
+   
+    private var trackerName: String = ""
+    private let categoryName = "Важное"
+    private let schedule: [Weekday] = [.monday, .tuesday, .wednesday, .thursday, .friday]
     private let data = ["Категория", "Расписание"]
     private let tableView = UITableView()
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = .ypWhite
-        
-        
+    // Заголовок
+    private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Новая привычка"
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        label.tintColor = .ypBlack
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
-        
-        NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
-            label.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            label.heightAnchor.constraint(equalToConstant: 22),
-            label.widthAnchor.constraint(equalToConstant: 133)
-        ])
-        
-        
+        label.textColor = .ypBlack
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    // Текстовое поле
+    private let nameTextField: UITextField = {
         let textField = UITextField()
-        textField.placeholder = "  Введите название трекера"
+        textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 12
         textField.backgroundColor = .background
         textField.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(textField)
         
-        NSLayoutConstraint.activate([
-            textField.heightAnchor.constraint(equalToConstant: 75),
-            textField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            textField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            textField.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 38)
-        ])
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
         textField.leftView = paddingView
         textField.leftViewMode = .always
         textField.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(textField)
         
+        return textField
+    }()
+    // Таблица
+    private let tableViewTracker: UITableView = {
         let tableView = UITableView()
         tableView.backgroundColor = .background
         tableView.layer.cornerRadius = 12
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(tableView)
-        
-        NSLayoutConstraint.activate([
-            tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-            tableView.heightAnchor.constraint(equalToConstant: 150),
-            tableView.topAnchor.constraint(equalTo: textField.bottomAnchor, constant: 24),
-            tableView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.dataSource = self
-        tableView.delegate = self
         
-        // Кнопка "Отменить" (Cancel)
+        return tableView
+    }()
+    
+    // Кнопка "Отменить"
+    private let cancelButton: UIButton = {
         let cancelButton = UIButton(type: .system)
         cancelButton.setTitle("Отменить", for: .normal)
         cancelButton.setTitleColor(.ypRed, for: .normal)
@@ -80,17 +70,11 @@ class NewTrackerController: UIViewController {
         cancelButton.layer.borderColor = UIColor.ypRed.cgColor
         cancelButton.backgroundColor = .ypWhite
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(cancelButton)
-        
-        NSLayoutConstraint.activate([
-            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
-            cancelButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -34),
-            cancelButton.heightAnchor.constraint(equalToConstant: 60),
-            cancelButton.widthAnchor.constraint(equalToConstant: 166)
-        ])
-        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
-        
-        // Кнопка "Сохранить" (Save)
+        return cancelButton
+    }()
+    
+    //Кнопка "Сохранить"
+    private let saveButton: UIButton = {
         let saveButton = UIButton(type: .system)
         saveButton.setTitle("Создать", for: .normal)
         saveButton.setTitleColor(.ypWhite, for: .normal)
@@ -101,15 +85,72 @@ class NewTrackerController: UIViewController {
         saveButton.layer.borderColor = UIColor.ypGray1.cgColor
         saveButton.backgroundColor = .ypGray1
         saveButton.translatesAutoresizingMaskIntoConstraints = false
+        return saveButton
+    }()
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        view.backgroundColor = .ypWhite
+        
+        view.addSubview(titleLabel)
+        view.addSubview(nameTextField)
+        view.addSubview(tableViewTracker)
+        view.addSubview(cancelButton)
         view.addSubview(saveButton)
         
+        
         NSLayoutConstraint.activate([
+            // Заголовок
+            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            titleLabel.heightAnchor.constraint(equalToConstant: 22),
+            titleLabel.widthAnchor.constraint(equalToConstant: 133),
+            
+            // Текстовое поле
+            nameTextField.heightAnchor.constraint(equalToConstant: 75),
+            nameTextField.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nameTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            nameTextField.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 38),
+            
+            // Таблица
+            tableViewTracker.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            tableViewTracker.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+            tableViewTracker.heightAnchor.constraint(equalToConstant: 150),
+            tableViewTracker.topAnchor.constraint(equalTo: nameTextField.bottomAnchor, constant: 24),
+            tableViewTracker.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            
+            
+            // Кнопка "Отменить"
+            cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            cancelButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -34),
+            cancelButton.heightAnchor.constraint(equalToConstant: 60),
+            cancelButton.widthAnchor.constraint(equalToConstant: 166),
+            
+            // Кнопка "Сохранить"
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             saveButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -34),
             saveButton.heightAnchor.constraint(equalToConstant: 60),
             saveButton.widthAnchor.constraint(equalToConstant: 166)
         ])
+        
+        nameTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
+        cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         saveButton.addTarget(self, action: #selector(saveTapped), for: .touchUpInside)
+        
+        tableViewTracker.dataSource = self
+        tableViewTracker.delegate = self
+       
+
+    }
+    
+    @objc private func textFieldChanged(_ textField: UITextField) {
+        // Сохраняем введенный текст в переменную
+        trackerName = textField.text ?? ""
+        // Если текст не пустой - кнопка активна (черная)
+        // Если текст пустой - кнопка неактивна (серая)
+        saveButton.isEnabled = !trackerName.isEmpty
+        saveButton.backgroundColor = saveButton.isEnabled ? .ypBlack : .ypGray1
     }
     
     @objc func cancelTapped() {
@@ -118,8 +159,19 @@ class NewTrackerController: UIViewController {
     
     @objc func saveTapped() {
         // Логика сохранения
+        guard !trackerName.isEmpty else {return}
         
-        dismiss(animated: true, completion: nil)
+        let tracker = Tracker(
+            id: UUID(),
+            label: trackerName,
+            color: "ypBlue",
+            emoji: "🏃",
+            timetable: TrackerSchedule(days: [.monday, .tuesday, .wednesday, .thursday, .friday])
+        )
+        print("🔵 Проверка делегата: \(delegate != nil ? "ЕСТЬ ✅" : "НЕТ ❌")")
+        delegate?.didCreateTracker(tracker, category: "Важное")
+        
+        dismiss(animated: true)
     }
 }
         
@@ -157,3 +209,4 @@ extension NewTrackerController: UITableViewDelegate {
                 return 75
             }
         }
+

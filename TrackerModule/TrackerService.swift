@@ -5,16 +5,16 @@
 //  Created by Наринэ  Овсепян on 05.07.2026.
 //
 
-import Foundation
+import UIKit
 
 struct Tracker {
-    let id: UInt
+    let id: UUID
     let label: String
     let color: String
     let emoji: String
     let timetable: TrackerSchedule
     
-    init(id: UInt, label: String, color: String, emoji: String, timetable: TrackerSchedule) {
+    init(id: UUID, label: String, color: String, emoji: String, timetable: TrackerSchedule) {
         self.id = id
         self.label = label
         self.color = color
@@ -34,10 +34,10 @@ struct TrackerCategory {
 }
 
 struct TrackerRecord {
-    let trackerId: UInt
+    let trackerId: UUID
     let date: Date
 
-    init(trackerId: UInt, date: Date) {
+    init(trackerId: UUID, date: Date) {
         self.trackerId = trackerId
         self.date = date
     }

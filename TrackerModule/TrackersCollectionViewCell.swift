@@ -6,11 +6,10 @@
 //
 
 import UIKit
-import Foundation
 
 final class TrackersCollectionViewCell: UICollectionViewCell {
   /*  let titleLable = UILabel()*/
-    let textLable = UILabel()
+    let textLabel = UILabel()
     let emoji = UILabel()
     let complitebButton = UIButton()
     let countLable = UILabel()
@@ -33,14 +32,14 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 12
         
         // Настройка заголовка
-        textLable.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        textLable.textColor = .ypWhite
-        contentView.addSubview(textLable)
-        textLable.translatesAutoresizingMaskIntoConstraints = false
+        textLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        textLabel.textColor = .ypWhite
+        contentView.addSubview(textLabel)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            textLable.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12),
-            textLable.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 12)])
+            textLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12),
+            textLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -12)])
         
         // Настройка эмодзи
         emoji.font = .systemFont(ofSize: 24)
@@ -85,7 +84,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     func configure(tracker: Tracker, isCompleted: Bool, count: Int) {
         colorView.backgroundColor = .green
         emoji.text = tracker.emoji
-        textLable.text = tracker.label
+        textLabel.text = tracker.label
         countLable.text = "\(count) дней"
         
     }
