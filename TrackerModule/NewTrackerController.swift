@@ -93,6 +93,8 @@ final class NewTrackerController: UIViewController {
         
         view.backgroundColor = .ypWhite
         
+        nameTextField.delegate = self
+        
         view.addSubview(titleLabel)
         view.addSubview(nameTextField)
         view.addSubview(tableViewTracker)
@@ -102,7 +104,7 @@ final class NewTrackerController: UIViewController {
         
         NSLayoutConstraint.activate([
             // Заголовок
-            titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 28),
+            titleLabel.topAnchor.constraint(equalTo: view.topAnchor, constant: 28),
             titleLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             titleLabel.heightAnchor.constraint(equalToConstant: 22),
             titleLabel.widthAnchor.constraint(equalToConstant: 133),
@@ -133,6 +135,8 @@ final class NewTrackerController: UIViewController {
             saveButton.heightAnchor.constraint(equalToConstant: 60),
             saveButton.widthAnchor.constraint(equalToConstant: 166)
         ])
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
         
         nameTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
         cancelButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
@@ -142,6 +146,10 @@ final class NewTrackerController: UIViewController {
         tableViewTracker.delegate = self
        
 
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     @objc private func textFieldChanged(_ textField: UITextField) {
@@ -165,7 +173,7 @@ final class NewTrackerController: UIViewController {
             id: UUID(),
             label: trackerName,
             color: "ypBlue",
-            emoji: "🏃",
+            emoji: "🧚‍♀️",
             timetable: TrackerSchedule(days: [.monday, .tuesday, .wednesday, .thursday, .friday])
         )
         print("🔵 Проверка делегата: \(delegate != nil ? "ЕСТЬ ✅" : "НЕТ ❌")")
@@ -209,4 +217,11 @@ extension NewTrackerController: UITableViewDelegate {
                 return 75
             }
         }
+
+extension NewTrackerController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+}
 

@@ -8,13 +8,16 @@
 import UIKit
 
 final class TrackersCollectionViewCell: UICollectionViewCell {
-  /*  let titleLable = UILabel()*/
+    /*  let titleLable = UILabel()*/
     let textLabel = UILabel()
     let emoji = UILabel()
     let complitebButton = UIButton()
-    let countLable = UILabel()
+    let countLabel = UILabel()
     let colorView = UIView()
     
+    private var trackerId: UUID?
+    private var isCompleted: Bool = false
+    private var completionCount: Int = 0
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -26,67 +29,115 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-        
-        
+    
+    
     private func setupUI() {
         contentView.layer.cornerRadius = 12
+        
+        // Добавляем colorView
+        contentView.addSubview(colorView)
+        colorView.translatesAutoresizingMaskIntoConstraints = false
+        colorView.layer.cornerRadius = 16
+        colorView.layer.masksToBounds = true
+        
+        NSLayoutConstraint.activate([
+            colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            colorView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            colorView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            colorView.heightAnchor.constraint(equalToConstant: 90)
+        ])
         
         // Настройка заголовка
         textLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
         textLabel.textColor = .ypWhite
-        contentView.addSubview(textLabel)
+        colorView.addSubview(textLabel)
         textLabel.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            textLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12),
-            textLabel.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: -12)])
+            textLabel.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
+            textLabel.rightAnchor.constraint(equalTo: colorView.rightAnchor, constant: -12),
+            textLabel.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -12)])
         
         // Настройка эмодзи
         emoji.font = .systemFont(ofSize: 24)
         emoji.layer.cornerRadius = 12
-        contentView.addSubview(emoji)
+        emoji.backgroundColor = .ypWhite30
+        emoji.textAlignment = .center
+        emoji.clipsToBounds = true
+        colorView.addSubview(emoji)
         emoji.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            emoji.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12),
-            emoji.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 12),
+            emoji.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
+            emoji.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
             emoji.heightAnchor.constraint(equalToConstant: 24),
             emoji.widthAnchor.constraint(equalToConstant: 24)
         ])
         
         // Настройка кнопки
-        let buttonImage = UIImage(named: "buttonCompleted")
-        let button = UIButton(type: .custom)
-        button.setImage(buttonImage, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(button)
+        /*let buttonImage = UIImage(named: "buttonCompleted")
+        complitebButton = UIButton(type: .system)*/
+        complitebButton.setImage(UIImage(named: "buttonCompleted"), for: .normal)
+        /*complitebButton.setImage(buttonImage, for: .normal)*/
+        complitebButton.translatesAutoresizingMaskIntoConstraints = false
+        complitebButton.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        contentView.addSubview(complitebButton)
         
         NSLayoutConstraint.activate([
-            button.topAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 8),
-            button.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 12),
-            button.heightAnchor.constraint(equalToConstant: 34),
-            button.widthAnchor.constraint(equalToConstant: 34)
+            complitebButton.topAnchor.constraint(equalTo: colorView.bottomAnchor, constant: 8),
+            complitebButton.rightAnchor.constraint(equalTo: colorView.rightAnchor, constant: -12),
+            complitebButton.heightAnchor.constraint(equalToConstant: 34),
+            complitebButton.widthAnchor.constraint(equalToConstant: 34)
             
         ])
         
         // Настройка счётчика
-        countLable.font = .systemFont(ofSize: 12, weight: .medium)
-        countLable.textColor = .ypBlack
-        countLable.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(countLable)
+        countLabel.font = .systemFont(ofSize: 12, weight: .medium)
+        countLabel.textColor = .ypBlack
+        countLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(countLabel)
         
         NSLayoutConstraint.activate([
-            countLable.topAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 16),
-            countLable.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12)
+            countLabel.topAnchor.constraint(equalTo: colorView.bottomAnchor, constant: 16),
+            countLabel.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 12)
         ])
     }
     
     func configure(tracker: Tracker, isCompleted: Bool, count: Int) {
-        colorView.backgroundColor = .green
+        
+        self.trackerId = tracker.id
+        self.isCompleted = isCompleted
+        self.completionCount = count
+        
+        contentView.backgroundColor = .ypWhite
+        colorView.backgroundColor = .ypGreen
         emoji.text = tracker.emoji
         textLabel.text = tracker.label
-        countLable.text = "\(count) дней"
+        textLabel.textColor = .ypWhite
+        countLabel.text = "\(count) дней"
+        updateButton()
         
     }
+    private func updateButton() {
+     if isCompleted {
+     let image = UIImage(named: "button_ checkmark")
+         complitebButton.setImage(image, for: .normal)
+     } else {
+     let image = UIImage(named: "buttonCompleted")
+         complitebButton.setImage(image, for: .normal)
+     }
+    }
     
+    @objc private func buttonTapped() {
+        /*guard let trackerId = trackerId else { return }*/
+        print("🔥 КНОПКА НАЖАТА!")
+        isCompleted.toggle()
+        if isCompleted {
+            completionCount += 1
+        } else {
+            completionCount -= 1
+        }
+        countLabel.text = "\(completionCount) дней"
+       updateButton()
+    }
 }

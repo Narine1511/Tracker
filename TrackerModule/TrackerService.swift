@@ -48,14 +48,14 @@ struct TrackerSchedule {
     let days: [Weekday]
 }
     
-    enum Weekday: CaseIterable {
-        case monday
-        case tuesday
-        case wednesday
-        case thursday
-        case friday
-        case saturday
-        case sunday
+    enum Weekday: String, CaseIterable {
+        case monday = "Monday"
+        case tuesday = "Tuesday"
+        case wednesday = "Wednesday"
+        case thursday = "Thursday"
+        case friday = "Friday"
+        case saturday = "Saturday"
+        case sunday = "Sunday"
         
         
         var shortName: String {
@@ -67,6 +67,17 @@ struct TrackerSchedule {
                    case .friday: return "Пт"
                    case .saturday: return "Сб"
                    case .sunday: return "Вс"
+            }
+        }
+        var numberInCalendar: Int {
+            switch self {
+            case .monday: return 2
+            case .tuesday: return 3
+            case .wednesday: return 4
+            case .thursday: return 5
+            case .friday: return 6
+            case .saturday: return 7
+            case .sunday: return 1
             }
         }
     }

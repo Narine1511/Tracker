@@ -40,7 +40,7 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             id: UUID(),
             label: "Пить воду",
             color: "#4A90D9",
-            emoji: "💧",
+            emoji: "✨",
             timetable: .init(days: [.monday]))
         
         let category1 = TrackerCategory(
