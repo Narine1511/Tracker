@@ -234,7 +234,6 @@ extension NewTrackerController: UITableViewDelegate {
         
               print("Индекс: \(indexPath.row)")
               print("Текст: \(data[indexPath.row])")
-              print("tableView: \(tableView)")
               print("tableViewTracker: \(tableViewTracker)")
         tableView.deselectRow(at: indexPath, animated: true)
             

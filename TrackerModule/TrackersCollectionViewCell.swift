@@ -136,7 +136,6 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     @objc private func buttonTapped() {
         guard let trackerId = trackerId else { return }
         print("🔥 КНОПКА НАЖАТА!")
-        /*isCompleted.toggle()*/
         
         let newState = !isCompleted
         let canChange = delegate?.didTapCompleteButton(for: trackerId, isCompleted: newState) ?? false

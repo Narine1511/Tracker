@@ -433,8 +433,8 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let selectedDate = calendar.startOfDay(for: currentDate)
-        print("📅 Сегодня (без времени): \(today)")
-            print("📅 Выбрано (без времени): \(selectedDate)")
+        print("Сегодня: \(today)")
+        print("Выбрано: \(selectedDate)")
         
         if selectedDate > today {
             return false
