@@ -289,7 +289,6 @@ final class SectionHeaderView: UICollectionReusableView {
 // MARK: - NewTrackerDelegate
 extension ViewController: NewTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
-        print("✅ ПОЛУЧИЛА ТРЕКЕР: \(tracker.label)")
         
         if let index = categories.firstIndex(where: { $0.title == category }) {
             let oldCategory = categories[index]
@@ -436,7 +435,6 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         let selectedDate = calendar.startOfDay(for: currentDate)
         print("📅 Сегодня (без времени): \(today)")
             print("📅 Выбрано (без времени): \(selectedDate)")
-            print("📅 Сравнение: \(selectedDate > today ? "БУДУЩЕЕ ❌" : "НОРМАЛЬНО ✅")")
         
         if selectedDate > today {
             return false

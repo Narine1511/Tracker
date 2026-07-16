@@ -236,8 +236,6 @@ extension NewTrackerController: UITableViewDelegate {
               print("Текст: \(data[indexPath.row])")
               print("tableView: \(tableView)")
               print("tableViewTracker: \(tableViewTracker)")
-              print("Это одна и та же таблица? \(tableView == tableViewTracker)")
-              print("=====================================")
         tableView.deselectRow(at: indexPath, animated: true)
             
             switch indexPath.row {
