@@ -198,24 +198,6 @@ extension NewTrackerController: UITableViewDataSource {
         cell.selectionStyle = .default
         return cell
     }
-   /* func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        
-        switch indexPath.row {
-        case 0:
-            let categoryVC = CategoryViewController()
-            present(categoryVC, animated: true, completion: nil)
-            
-        case 1:
-            let scheduleVC = ScheduleViewController()
-            scheduleVC.title = data[indexPath.row]
-            scheduleVC.delegate = self
-            present(scheduleVC, animated: true, completion: nil)
-            
-        default:
-            break
-        }
-    }*/
 }
 
 extension NewTrackerController: ScheduleViewControllerDelegate {

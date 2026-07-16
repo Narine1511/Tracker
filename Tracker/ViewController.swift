@@ -309,7 +309,7 @@ extension ViewController: NewTrackerDelegate {
         /*collectionView.reloadData()
          updatePlaceholderVisibility()*/
         updateTrackersForCurrentDate()
-        print("✅ Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")
+        print("Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")
     }
 }
 

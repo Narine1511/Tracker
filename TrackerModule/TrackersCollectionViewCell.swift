@@ -80,8 +80,6 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         ])
         
         // Настройка кнопки
-        /*let buttonImage = UIImage(named: "buttonCompleted")
-        complitebButton = UIButton(type: .system)*/
         complitebButton.setImage(UIImage(named: "buttonCompleted"), for: .normal)
         /*complitebButton.setImage(buttonImage, for: .normal)*/
         complitebButton.translatesAutoresizingMaskIntoConstraints = false
@@ -135,7 +133,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     
     @objc private func buttonTapped() {
         guard let trackerId = trackerId else { return }
-        print("🔥 КНОПКА НАЖАТА!")
+        print("КНОПКА НАЖАТА!")
         
         let newState = !isCompleted
         let canChange = delegate?.didTapCompleteButton(for: trackerId, isCompleted: newState) ?? false
