@@ -430,9 +430,16 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - UICollectionViewDelegate
 
 extension ViewController: TrackersCollectionViewCellDelegate {
-    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) {
-        if currentDate > Date() {
-            return
+    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) -> Bool {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let selectedDate = calendar.startOfDay(for: currentDate)
+        print("📅 Сегодня (без времени): \(today)")
+            print("📅 Выбрано (без времени): \(selectedDate)")
+            print("📅 Сравнение: \(selectedDate > today ? "БУДУЩЕЕ ❌" : "НОРМАЛЬНО ✅")")
+        
+        if selectedDate > today {
+            return false
         }
         if isCompleted {
             let record = TrackerRecord(trackerId: trackerId, date: currentDate)
@@ -442,7 +449,9 @@ extension ViewController: TrackersCollectionViewCellDelegate {
                 $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: currentDate)
             }
         }
+        /*saveCompletedTrackers()*/
         updateTrackersForCurrentDate()
+        return true
     }
 }
 

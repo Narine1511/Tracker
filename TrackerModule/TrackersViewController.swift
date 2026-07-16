@@ -5,7 +5,7 @@
 //  Created by Наринэ  Овсепян on 04.07.2026.
 //
 
-import UIKit
+/*import UIKit
 
 
 final class TrackersViewController: UIViewController, UICollectionViewDelegate {
@@ -166,5 +166,5 @@ extension TrackersViewController: UICollectionViewDataSource {
         cell.configure(tracker: tracker, isCompleted: false, count: 0)
         return cell
     }
-}
+}*/
 

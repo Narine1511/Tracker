@@ -178,7 +178,7 @@ final class NewTrackerController: UIViewController {
             label: trackerName,
             color: "ypBlue",
             emoji: "🧚‍♀️",
-            timetable: TrackerSchedule(days: [.monday, .tuesday, .wednesday, .thursday, .friday])
+            timetable: TrackerSchedule(days: selectedScheule)
         )
         print("🔵 Проверка делегата: \(delegate != nil ? "ЕСТЬ ✅" : "НЕТ ❌")")
         delegate?.didCreateTracker(tracker, category: "Важное")
@@ -231,9 +231,7 @@ extension NewTrackerController: UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("=====================================")
-              print("🔥🔥🔥 МЕТОД didSelectRowAt ВЫЗВАН! 🔥🔥🔥")
-              print("=====================================")
+        
               print("Индекс: \(indexPath.row)")
               print("Текст: \(data[indexPath.row])")
               print("tableView: \(tableView)")

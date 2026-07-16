@@ -7,7 +7,7 @@
 
 import UIKit
 protocol TrackersCollectionViewCellDelegate: AnyObject {
-    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool)
+    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) -> Bool
 }
 
 final class TrackersCollectionViewCell: UICollectionViewCell {
@@ -136,7 +136,14 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     @objc private func buttonTapped() {
         guard let trackerId = trackerId else { return }
         print("🔥 КНОПКА НАЖАТА!")
-        isCompleted.toggle()
+        /*isCompleted.toggle()*/
+        
+        let newState = !isCompleted
+        let canChange = delegate?.didTapCompleteButton(for: trackerId, isCompleted: newState) ?? false
+        if !canChange {return}
+        
+        
+        isCompleted = newState
         if isCompleted {
             completionCount += 1
         } else {
@@ -144,7 +151,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         }
         countLabel.text = "\(completionCount) дней"
        updateButton()
-        delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)
+        /*delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)*/
     }
 
 }
