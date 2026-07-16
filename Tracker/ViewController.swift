@@ -22,19 +22,19 @@ class ViewController: UIViewController {
             collectionViewLayout: layout
         )
         collectionView.backgroundColor = .white
-                collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(TrackersCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         return collectionView
     }()
     private func setupCollectionView() {
-
+        
         collectionView.dataSource = self
         collectionView.delegate = self
         
         collectionView.register(
             SectionHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
-        withReuseIdentifier: "SectionHeader")
+            withReuseIdentifier: "SectionHeader")
     }
     
     // MARK: - UI Элементы
@@ -198,7 +198,7 @@ class ViewController: UIViewController {
         currentDate = sender.date
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd.MM.yyyy"
-
+        
         let formattedDate = dateFormatter.string(from: currentDate)
         print("Выбранная дата: \(formattedDate)")
         updateTrackersForCurrentDate()
@@ -227,7 +227,7 @@ class ViewController: UIViewController {
         categories = updateCategories
         trackers = categories.flatMap { $0.trackers }
         /*collectionView.reloadData()
-        updatePlaceholderVisibility()*/
+         updatePlaceholderVisibility()*/
         updateTrackersForCurrentDate()
     }
     
@@ -242,24 +242,24 @@ class ViewController: UIViewController {
             completedTrackers.append(TrackerRecord(trackerId: trackerId, date: date))
         }
     }
-private func updateTrackersForCurrentDate() {
-    let calendar = Calendar.current
-    // Узнаём число дня недели из Date
-    let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
-    
-    filteredCategories = categories.map { category in
-        let filteredTrackers = category.trackers.filter {tracker in
-            tracker.timetable.days.contains { $0.numberInCalendar == weekdayNumber}
-            
-        }
-        return TrackerCategory(title: category.title, trackers: filteredTrackers)
-    }.filter { !$0.trackers.isEmpty}
-
-    trackers = filteredCategories.flatMap { $0.trackers }
-    collectionView.reloadData()
-    updatePlaceholderVisibility()
-    
-}
+    private func updateTrackersForCurrentDate() {
+        let calendar = Calendar.current
+        // Узнаём число дня недели из Date
+        let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
+        
+        filteredCategories = categories.map { category in
+            let filteredTrackers = category.trackers.filter {tracker in
+                tracker.timetable.days.contains { $0.numberInCalendar == weekdayNumber}
+                
+            }
+            return TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }.filter { !$0.trackers.isEmpty}
+        
+        trackers = filteredCategories.flatMap { $0.trackers }
+        collectionView.reloadData()
+        updatePlaceholderVisibility()
+        
+    }
 }
 final class SectionHeaderView: UICollectionReusableView {
     let titleLabel: UILabel = {
@@ -271,20 +271,20 @@ final class SectionHeaderView: UICollectionReusableView {
         return label
     }()
     override init(frame: CGRect) {
-            super.init(frame: frame)
-            addSubview(titleLabel)
-            
-            NSLayoutConstraint.activate([
-                titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-                titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
-                titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
-            ])
-        }
+        super.init(frame: frame)
+        addSubview(titleLabel)
         
-        required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
+        NSLayoutConstraint.activate([
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
+            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -12),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+        ])
     }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
 
 // MARK: - NewTrackerDelegate
 extension ViewController: NewTrackerDelegate {
@@ -308,7 +308,7 @@ extension ViewController: NewTrackerDelegate {
         }
         
         /*collectionView.reloadData()
-        updatePlaceholderVisibility()*/
+         updatePlaceholderVisibility()*/
         updateTrackersForCurrentDate()
         print("✅ Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")
     }
@@ -317,17 +317,14 @@ extension ViewController: NewTrackerDelegate {
 // MARK: - UICollectionViewDataSource
 extension ViewController: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
-        
         return filteredCategories.count
-        
-
     }
     
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        /* return categories[section].trackers.count*/
         return filteredCategories[section].trackers.count
-
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard let cell = collectionView.dequeueReusableCell(
@@ -335,11 +332,20 @@ extension ViewController: UICollectionViewDataSource {
             for: indexPath) as? TrackersCollectionViewCell else {
             return UICollectionViewCell()
         }
-        /* let tracker = categories[indexPath.section].trackers[indexPath.item]*/
-        let tracker = trackers[indexPath.item]
-        cell.configure(tracker: tracker, isCompleted: false, count: 0)
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        
+        //Проверяем, выполнен ли трекер в currentDate
+        let isCompleted = completedTrackers.contains {record in
+            record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+        }
+        let count = completedTrackers.filter{$0.trackerId == tracker.id}.count
+        
+        cell.configure(tracker: tracker, isCompleted: isCompleted, count: count)
+        cell.delegate = self
         return cell
     }
+    
+    
     func collectionView(
         _ collectionView: UICollectionView,
         viewForSupplementaryElementOfKind kind: String,
@@ -355,24 +361,23 @@ extension ViewController: UICollectionViewDataSource {
         let category = filteredCategories[indexPath.section]
         header.titleLabel.text = category.title
         header.isHidden = false
-       /* if !trackers.isEmpty {
-            header.titleLabel.text = "Трекеры"
-        }*/
         return header
     }
+    
+    
     func collectionView(
-           _ collectionView: UICollectionView,
-           layout collectionViewLayout: UICollectionViewLayout,
-           referenceSizeForHeaderInSection section: Int
-       ) -> CGSize {
-           // Проверяем, есть ли трекеры в этой секции
-           /*
-           if trackers.isEmpty {
-                       return .zero
-                   }*/
-
-           return CGSize(width: collectionView.frame.width, height: 46)
-       }
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        referenceSizeForHeaderInSection section: Int
+    ) -> CGSize {
+        // Проверяем, есть ли трекеры в этой секции
+        /*
+         if trackers.isEmpty {
+         return .zero
+         }*/
+        
+        return CGSize(width: collectionView.frame.width, height: 46)
+    }
 }
 
 // MARK: - UICollectionViewDelegate
@@ -390,16 +395,20 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         let availableWidth = collectionView.frame.width - spacing * (cellCount - 1)
         let cellWidth = availableWidth / cellCount
         print("ширина \(collectionView.frame.width) и ширина ячейки \(cellWidth))")
-                
-                return CGSize(width: cellWidth, height: 148)
+        
+        return CGSize(width: cellWidth, height: 148)
     }
+    
+    
     func collectionView(
-            _ collectionView: UICollectionView,
-            layout collectionViewLayout: UICollectionViewLayout,
-            minimumInteritemSpacingForSectionAt section: Int
-        ) -> CGFloat {
-            return 10
-        }
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        minimumInteritemSpacingForSectionAt section: Int
+    ) -> CGFloat {
+        return 10
+    }
+    
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -407,6 +416,8 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     ) -> CGFloat {
         return 10
     }
+    
+    
     func collectionView(
         _ collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
@@ -415,4 +426,23 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         return UIEdgeInsets(top: 0, left: 0, bottom: 20, right: 0)
     }
 }
-    
+
+// MARK: - UICollectionViewDelegate
+
+extension ViewController: TrackersCollectionViewCellDelegate {
+    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) {
+        if currentDate > Date() {
+            return
+        }
+        if isCompleted {
+            let record = TrackerRecord(trackerId: trackerId, date: currentDate)
+            completedTrackers.append(record)
+        } else {
+            completedTrackers.removeAll {
+                $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: currentDate)
+            }
+        }
+        updateTrackersForCurrentDate()
+    }
+}
+

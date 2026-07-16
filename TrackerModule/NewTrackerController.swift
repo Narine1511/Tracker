@@ -21,6 +21,7 @@ final class NewTrackerController: UIViewController {
     private let schedule: [Weekday] = [.monday, .tuesday, .wednesday, .thursday, .friday]
     private let data = ["Категория", "Расписание"]
     private let tableView = UITableView()
+    private var selectedScheule: [Weekday] = []
     
     // Заголовок
     private let titleLabel: UILabel = {
@@ -136,6 +137,7 @@ final class NewTrackerController: UIViewController {
             saveButton.widthAnchor.constraint(equalToConstant: 166)
         ])
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
         
         nameTextField.addTarget(self, action: #selector(textFieldChanged), for: .editingChanged)
@@ -144,7 +146,6 @@ final class NewTrackerController: UIViewController {
         
         tableViewTracker.dataSource = self
         tableViewTracker.delegate = self
-       
 
     }
     
@@ -168,6 +169,9 @@ final class NewTrackerController: UIViewController {
     @objc func saveTapped() {
         // Логика сохранения
         guard !trackerName.isEmpty else {return}
+        guard !selectedScheule.isEmpty else {
+            return
+        }
         
         let tracker = Tracker(
             id: UUID(),
@@ -194,7 +198,7 @@ extension NewTrackerController: UITableViewDataSource {
         cell.selectionStyle = .default
         return cell
     }
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+   /* func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
         switch indexPath.row {
@@ -205,18 +209,56 @@ extension NewTrackerController: UITableViewDataSource {
         case 1:
             let scheduleVC = ScheduleViewController()
             scheduleVC.title = data[indexPath.row]
+            scheduleVC.delegate = self
             present(scheduleVC, animated: true, completion: nil)
             
         default:
             break
         }
+    }*/
+}
+
+extension NewTrackerController: ScheduleViewControllerDelegate {
+    func didSelectDays(_ days: [Weekday]) {
+        self.selectedScheule = days
+        let indexPath = IndexPath(row: 1, section: 0)
+                tableViewTracker.reloadRows(at: [indexPath], with: .automatic)
     }
 }
 extension NewTrackerController: UITableViewDelegate {
-            func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-                return 75
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("=====================================")
+              print("🔥🔥🔥 МЕТОД didSelectRowAt ВЫЗВАН! 🔥🔥🔥")
+              print("=====================================")
+              print("Индекс: \(indexPath.row)")
+              print("Текст: \(data[indexPath.row])")
+              print("tableView: \(tableView)")
+              print("tableViewTracker: \(tableViewTracker)")
+              print("Это одна и та же таблица? \(tableView == tableViewTracker)")
+              print("=====================================")
+        tableView.deselectRow(at: indexPath, animated: true)
+            
+            switch indexPath.row {
+            case 0:
+                let categoryVC = CategoryViewController()
+                present(categoryVC, animated: true, completion: nil)
+                
+            case 1:
+                let scheduleVC = ScheduleViewController()
+                scheduleVC.title = data[indexPath.row]
+                scheduleVC.delegate = self
+                present(scheduleVC, animated: true, completion: nil)
+                
+            default:
+                break
             }
-        }
+        
+    }
+}
 
 extension NewTrackerController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

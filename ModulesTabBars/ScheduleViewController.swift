@@ -6,44 +6,16 @@
 //
 
 import UIKit
-/*class ScheduleCell: UITableViewCell {
- let titleLabel: UILabel = {
- let label = UILabel()
- label.font = .systemFont(ofSize: 16)
- label.textColor = .ypBlack
- label.translatesAutoresizingMaskIntoConstraints = false
- return label
- 
- }()
- 
- let toggleSwitch: UISwitch = {
- let toggle = UISwitch()
- toggle.onTintColor = .green
- toggle.translatesAutoresizingMaskIntoConstraints = false
- return toggle
- 
- }()
- override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
- super.init(style: style, reuseIdentifier: reuseIdentifier)
- setupUI()
- }
- 
- required init?(coder: NSCoder) {
- fatalError("init(coder:) has not been implemented")
- }
- func setupUI() {
- contentView.addSubview(titleLabel)
- contentView.addSubview(toggleSwitch)
- }
- }*/
 
-
-
-
+protocol ScheduleViewControllerDelegate: AnyObject {
+    func didSelectDays(_ days: [Weekday])
+}
 
 final class ScheduleViewController: UIViewController {
     private let dataSchedule = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     private var selectedDays: [Bool] = Array(repeating: false, count: 7)
+    
+    weak var delegate: ScheduleViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -98,6 +70,7 @@ final class ScheduleViewController: UIViewController {
             readyButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -50),
             readyButton.heightAnchor.constraint(equalToConstant: 60)
         ])
+        readyButton.addTarget(self, action: #selector(readyButtonTapped), for: .touchUpInside)
     }
 }
 extension ScheduleViewController: UITableViewDataSource {
@@ -108,7 +81,7 @@ extension ScheduleViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = dataSchedule[indexPath.row]
         cell.backgroundColor = .background
-        cell.selectionStyle = .none
+        cell.selectionStyle = .default
         
         let toggleSwitch = UISwitch()
         toggleSwitch.isOn = selectedDays[indexPath.row]
@@ -124,14 +97,22 @@ extension ScheduleViewController: UITableViewDataSource {
         selectedDays[sender.tag] = sender.isOn
     }
     
+    @objc func readyButtonTapped() {
+        let weekdays: [Weekday] = selectedDays.enumerated().compactMap{index, isSelected in
+            guard isSelected else {return nil}
+            return Weekday.allCases[index]
+        }
+        delegate?.didSelectDays(weekdays)
+        dismiss(animated: true, completion:  nil)
+    }
     
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    /*func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         selectedDays[indexPath.row].toggle()
         tableView.reloadRows(at: [indexPath], with: .automatic)
         
-        switch indexPath.row {
+       switch indexPath.row {
         case 0:
             let categoryVC = CategoryViewController()
             present(categoryVC, animated: true, completion: nil)
@@ -143,12 +124,17 @@ extension ScheduleViewController: UITableViewDataSource {
             
         default:
             break
-        }
+        }*/
     }
-}
+
 extension ScheduleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+            tableView.deselectRow(at: indexPath, animated: true)
+            selectedDays[indexPath.row].toggle()
+            tableView.reloadRows(at: [indexPath], with: .automatic)
+        }
 }
 

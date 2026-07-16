@@ -43,9 +43,16 @@ final class TrackersViewController: UIViewController, UICollectionViewDelegate {
             emoji: "✨",
             timetable: .init(days: [.monday]))
         
+        let tracker2 = Tracker(
+            id: UUID(),
+            label: "Есть фрукты",
+            color: "#4A90D9",
+            emoji: "✨",
+            timetable: .init(days: [.monday]))
+        
         let category1 = TrackerCategory(
             title: "Здоровье",
-            trackers: [tracker1]
+            trackers: [tracker1, tracker2]
         )
         categories = [category1]
         trackers = categories.flatMap { $0.trackers }

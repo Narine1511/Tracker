@@ -6,8 +6,12 @@
 //
 
 import UIKit
+protocol TrackersCollectionViewCellDelegate: AnyObject {
+    func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool)
+}
 
 final class TrackersCollectionViewCell: UICollectionViewCell {
+    
     /*  let titleLable = UILabel()*/
     let textLabel = UILabel()
     let emoji = UILabel()
@@ -15,6 +19,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     let countLabel = UILabel()
     let colorView = UIView()
     
+    weak var delegate: TrackersCollectionViewCellDelegate?
     private var trackerId: UUID?
     private var isCompleted: Bool = false
     private var completionCount: Int = 0
@@ -129,7 +134,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     }
     
     @objc private func buttonTapped() {
-        /*guard let trackerId = trackerId else { return }*/
+        guard let trackerId = trackerId else { return }
         print("🔥 КНОПКА НАЖАТА!")
         isCompleted.toggle()
         if isCompleted {
@@ -139,5 +144,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         }
         countLabel.text = "\(completionCount) дней"
        updateButton()
+        delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)
     }
+
 }
