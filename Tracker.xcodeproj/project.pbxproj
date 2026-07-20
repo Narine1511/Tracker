@@ -68,6 +68,16 @@
 			path = TrackerModule;
 			sourceTree = "<group>";
 		};
+		C0DDB492300BD1D2009A788D /* Cells */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Cells;
+			sourceTree = "<group>";
+		};
+		C0DDB493300BD1F8009A788D /* Controllers */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +108,8 @@
 		C0DDB21B2FE574B3009A788D = {
 			isa = PBXGroup;
 			children = (
+				C0DDB493300BD1F8009A788D /* Controllers */,
+				C0DDB492300BD1D2009A788D /* Cells */,
 				C0DDB38230026F61009A788D /* TrackerModule */,
 				C0DDB2ED2FF822BF009A788D /* ModulesTabBars */,
 				C0DDB2262FE574B3009A788D /* Tracker */,
@@ -136,6 +148,8 @@
 				C0DDB2262FE574B3009A788D /* Tracker */,
 				C0DDB2ED2FF822BF009A788D /* ModulesTabBars */,
 				C0DDB38230026F61009A788D /* TrackerModule */,
+				C0DDB492300BD1D2009A788D /* Cells */,
+				C0DDB493300BD1F8009A788D /* Controllers */,
 			);
 			name = Tracker;
 			packageProductDependencies = (
