@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C0BBC26B300E202500730A55 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C0BBC269300E202500730A55 /* Model.xcdatamodeld */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		C0DDB23B2FE574B4009A788D /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,6 +28,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		C0BBC26A300E202500730A55 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
 		C0DDB2242FE574B3009A788D /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DDB23A2FE574B4009A788D /* TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DDB2442FE574B4009A788D /* TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -40,6 +45,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		C0BBC26D300E742800730A55 /* CoreData  */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "CoreData ";
+			sourceTree = "<group>";
+		};
 		C0DDB2262FE574B3009A788D /* Tracker */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -108,6 +118,8 @@
 		C0DDB21B2FE574B3009A788D = {
 			isa = PBXGroup;
 			children = (
+				C0BBC26D300E742800730A55 /* CoreData  */,
+				C0BBC269300E202500730A55 /* Model.xcdatamodeld */,
 				C0DDB493300BD1F8009A788D /* Controllers */,
 				C0DDB492300BD1D2009A788D /* Cells */,
 				C0DDB38230026F61009A788D /* TrackerModule */,
@@ -145,6 +157,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
+				C0BBC26D300E742800730A55 /* CoreData  */,
 				C0DDB2262FE574B3009A788D /* Tracker */,
 				C0DDB2ED2FF822BF009A788D /* ModulesTabBars */,
 				C0DDB38230026F61009A788D /* TrackerModule */,
@@ -277,6 +290,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0BBC26B300E202500730A55 /* Model.xcdatamodeld in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -591,6 +605,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		C0BBC269300E202500730A55 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				C0BBC26A300E202500730A55 /* Model.xcdatamodel */,
+			);
+			currentVersion = C0BBC26A300E202500730A55 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = C0DDB21C2FE574B3009A788D /* Project object */;
 }
