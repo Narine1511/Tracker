@@ -11,6 +11,10 @@ import CoreData
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
+    
+    static var shared: AppDelegate {
+        return UIApplication.shared.delegate as! AppDelegate
+    }
 
     lazy var persistentContainer: NSPersistentContainer = {
         let conteiner = NSPersistentContainer(name: "Model")
