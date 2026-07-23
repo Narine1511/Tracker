@@ -285,9 +285,9 @@ class ViewController: UIViewController {
         // Узнаём число дня недели из Date
         let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
         print("Текущий день (число): \(weekdayNumber)")
-        print("📂 Всего категорий: \(categories.count)")
+        print(" Всего категорий: \(categories.count)")
             for category in categories {
-                print("   📂 Категория: \(category.title), трекеров: \(category.trackers.count)")
+                print(" Категория: \(category.title), трекеров: \(category.trackers.count)")
                 for tracker in category.trackers {
                     let days = tracker.timetable.days.map { $0.rawValue }
                     let numbers = tracker.timetable.days.map { $0.numberInCalendar }
