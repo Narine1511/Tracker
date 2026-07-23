@@ -60,7 +60,7 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
     }
     // Отметить трекер как выполненный
     func save(_ record: TrackerRecord) {
-
+        print("Сохранено успешно")
         let entity = TrackerRecordCoreData(context: context)
         entity.trackerId = record.trackerId
         entity.date = record.date

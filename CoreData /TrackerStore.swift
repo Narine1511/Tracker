@@ -99,16 +99,15 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
     
     private func convertModel(_ entity: TrackerCoreData) -> Tracker {
         var days: [Weekday] = []
-                if let dayStrings = entity.days as? [String] {
-                    days = dayStrings.compactMap { Weekday(rawValue: $0) }
+        if let dayString = entity.days, !dayString.isEmpty {
+                    days = dayString.split(separator: ",").compactMap { Weekday(rawValue: String($0)) }
                 }
-        
         return Tracker(
             id: entity.id ?? UUID(),
             label: entity.label ?? "",
             color: entity.color ?? "",
             emoji: entity.emoji ?? "",
-            timetable: TrackerSchedule(days: [])
+            timetable: TrackerSchedule(days: days)
         )
     }
         func controllerDidChangeContent(_ controller: NSFetchedResultsController<any NSFetchRequestResult>) {

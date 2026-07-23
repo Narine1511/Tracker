@@ -343,6 +343,10 @@ final class SectionHeaderView: UICollectionReusableView {
 // MARK: - NewTrackerDelegate
 extension ViewController: NewTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
+               print("Название: \(tracker.label)")
+               print("Дни: \(tracker.timetable.days.map { $0.rawValue })")
+               print("Категория: \(category)")
+               print("Совпадает с 'Все трекеры'? \(category == "Все трекеры")")
         trackerStore.save(tracker)
         /*if let index = categories.firstIndex(where: { $0.title == category }) {
             let oldCategory = categories[index]
