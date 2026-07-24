@@ -450,7 +450,6 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
         let cellCount: CGFloat = 2
         let availableWidth = collectionView.frame.width - spacing * (cellCount - 1)
         let cellWidth = availableWidth / cellCount
-        print("ширина \(collectionView.frame.width) и ширина ячейки \(cellWidth))")
         
         return CGSize(width: cellWidth, height: 148)
     }
