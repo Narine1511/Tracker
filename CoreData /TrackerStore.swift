@@ -37,17 +37,12 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
     
     // Создать новый трекер
     func save(_ tracker: Tracker) {
-        print("TrackerStore.save() начат")
-            print("Название: \(tracker.label)")
-            print("Дни (модель): \(tracker.timetable.days.map { $0.rawValue })")
-        print("ID: \(tracker.id), \(tracker.label), \(tracker.emoji), \(tracker.color), \(tracker.timetable.days.map { $0.rawValue })")
+        
         let entity = TrackerCoreData(context: context)
         updateEntity(entity, with: tracker)
-        print("После updateEntity: entity.days = \(entity.days ?? "nil")")
             
         AppDelegate.shared.saveContext()
         onUpdate?()
-        print("onUpdate вызван")
     }
     
     // Получить все трекеры

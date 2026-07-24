@@ -60,14 +60,23 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
     }
     // Отметить трекер как выполненный
     func save(_ record: TrackerRecord) {
-        print("Сохранено успешно")
+       
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: record.date)
+        
         let entity = TrackerRecordCoreData(context: context)
         entity.trackerId = record.trackerId
         entity.date = record.date
+        print("Entity создана, сохраняем...")
         AppDelegate.shared.saveContext()
+        print("Контекст сохранен")
+        onUpdate?()
     }
     // Отменить выполнение
     func delete(_ record: TrackerRecord) {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: record.date)
+        
         let request = TrackerRecordCoreData.fetchRequest()
         request.predicate = NSPredicate(
             format: "trackerId == %@ AND date == %@",
@@ -75,28 +84,38 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
             record.date as CVarArg
         )
         guard let entity = try? context.fetch(request).first else {
-        /*{throw NSError(
-         domain: "TrackerRecordStore",
-         code: 404,
-         userInfo: [NSLocalizedDescriptionKey: "Record not found"])
-         }*/
+
             return
             }
         context.delete(entity)
         AppDelegate.shared.saveContext()
+        onUpdate?()
     }
     // Проверить, выполнен ли трекер
     
     func isRecorded(trackerId: UUID, date: Date) -> Bool {
+        let calendar = Calendar.current
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        
         let request = TrackerRecordCoreData.fetchRequest()
         request.predicate = NSPredicate(
             format: "trackerId == %@ AND date == %@",
         trackerId as CVarArg,
-        date as CVarArg
+        startOfDay as CVarArg,
+            endOfDay as CVarArg
         )
-        request.fetchLimit = 1
+        /*request.fetchLimit = 1
         let count = try? context.count(for: request)
-        return count ?? 0 > 0
+        return count ?? 0 > 0*/
+        
+        //код для проверки? код выше надо раскомментировать
+        do {
+                let count = try context.count(for: request)
+                return count > 0
+            } catch {
+                return false
+            }
     }
     
     private func convertModel(_ entity: TrackerRecordCoreData) -> TrackerRecord {

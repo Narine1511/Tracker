@@ -13,11 +13,11 @@ class ViewController: UIViewController {
     private let trackerStore = TrackerStore()
     private let recordStore = TrackerRecordStore()
     
-    
     private let defaultCategoryTitle = "Все трекеры"
     
     private var categories: [TrackerCategory] = []
     var completedTrackers: [TrackerRecord] = []
+    private var trackerRecordCount: [UUID: Int] = [:]
     var trackers: [Tracker] = []
     private var currentDate: Date = Date()
     private var filteredCategories: [TrackerCategory] = []
@@ -100,18 +100,15 @@ class ViewController: UIViewController {
         setupCollectionView()
         setupInitialData()
         
-        
         setupBindings()
         loadData()
     }
     
     private func setupBindings() {
         trackerStore.onUpdate = { [weak self] in
-            print("TrackerStore обновился!")
             self?.loadData()
         }
         recordStore.onUpdate = { [weak self] in
-            print("RecordStore обновился!")
             self?.loadData()
         }
     }
@@ -124,9 +121,15 @@ class ViewController: UIViewController {
         )
         categories = [category]
         
-        completedTrackers = recordStore.fetchAll()
-        print("Загружено записей из Store: \(completedTrackers.count)")
+        let allRecords = recordStore.fetchAll()
+        var newCount: [UUID: Int] = [:]
+        for record in allRecords {
+            newCount[record.trackerId, default: 0] += 1
+        }
+       trackerRecordCount = newCount
+        completedTrackers = allRecords
         updateTrackersForCurrentDate()
+
     }
     
     // MARK: - Настройка UI
@@ -234,12 +237,11 @@ class ViewController: UIViewController {
         dateFormatter.dateFormat = "dd.MM.yyyy"
         
         let formattedDate = dateFormatter.string(from: currentDate)
-        print("Выбранная дата: \(formattedDate)")
         updateTrackersForCurrentDate()
     }
     
     @objc private func addTrackerTapped() {
-        print("🟢 Кнопка + нажата!")
+        
         let newTrackerVC = NewTrackerController()
         newTrackerVC.delegate = self
         let navController = UINavigationController(rootViewController: newTrackerVC)
@@ -261,11 +263,7 @@ class ViewController: UIViewController {
         categories = updateCategories
         trackers = categories.flatMap { $0.trackers }
         updateTrackersForCurrentDate()*/
-        do {
-            try trackerStore.save(tracker)
-        } catch {
-            print("Ошибка сохранения трекера: \(error)")
-        }
+        trackerStore.save(tracker)
     }
     
     func toggleTrackerCompletion(trackerId: UUID, date: Date) {
@@ -280,26 +278,18 @@ class ViewController: UIViewController {
         }
     }
     private func updateTrackersForCurrentDate() {
-        print("updateTrackersForCurrentDate() вызван")
+       
         let calendar = Calendar.current
         // Узнаём число дня недели из Date
         let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
-        print("Текущий день (число): \(weekdayNumber)")
         print(" Всего категорий: \(categories.count)")
             for category in categories {
                 print(" Категория: \(category.title), трекеров: \(category.trackers.count)")
                 for tracker in category.trackers {
                     let days = tracker.timetable.days.map { $0.rawValue }
                     let numbers = tracker.timetable.days.map { $0.numberInCalendar }
-                    print("      - \(tracker.label): дни \(days) → числа \(numbers)")
                 }
             }
-        
-        
-        
-        
-        
-        
         
         filteredCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter {tracker in
@@ -343,10 +333,6 @@ final class SectionHeaderView: UICollectionReusableView {
 // MARK: - NewTrackerDelegate
 extension ViewController: NewTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
-               print("Название: \(tracker.label)")
-               print("Дни: \(tracker.timetable.days.map { $0.rawValue })")
-               print("Категория: \(category)")
-               print("Совпадает с 'Все трекеры'? \(category == "Все трекеры")")
         trackerStore.save(tracker)
         /*if let index = categories.firstIndex(where: { $0.title == category }) {
             let oldCategory = categories[index]
@@ -398,10 +384,17 @@ extension ViewController: UICollectionViewDataSource {
        /* let isCompleted = completedTrackers.contains {record in
             record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
         }*/
+        let allRecords = recordStore.fetchAll()
+        /*let count = allRecords.filter { $0.trackerId == tracker.id }.count*/
+        
+        let context = AppDelegate.shared.context
+        let request = TrackerRecordCoreData.fetchRequest()
+            request.predicate = NSPredicate(format: "trackerId == %@", tracker.id as CVarArg)
+        let count = (try? context.count(for: request)) ?? 0
+        
         let isCompleted = recordStore.isRecorded(
             trackerId: tracker.id,
             date: currentDate)
-        let count = completedTrackers.filter{$0.trackerId == tracker.id}.count
         
         cell.configure(tracker: tracker, isCompleted: isCompleted, count: count)
         cell.delegate = self
@@ -494,33 +487,43 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
 
 extension ViewController: TrackersCollectionViewCellDelegate {
     func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) -> Bool {
+        print("didTapCompleteButton ВЫЗВАН 🟢🟢🟢")
+        
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let selectedDate = calendar.startOfDay(for: currentDate)
-        print("Сегодня: \(today)")
-        print("Выбрано: \(selectedDate)")
         
         if selectedDate > today {
+            
             return false
+            
         }
-        do {
+        
             if isCompleted {
                 // Снимаем отметку
                 let record = TrackerRecord(
                     trackerId: trackerId,
-                    date: currentDate)
-                try recordStore.delete(record)
+                    date: selectedDate)
+                recordStore.delete(record)
+                loadData()
             } else {
                 // Отмечаем выполнение
                 let record = TrackerRecord(
                     trackerId: trackerId,
-                    date: currentDate)
-                try recordStore.save(record)
+                    date: selectedDate)
+                recordStore.save(record)
+                
+                loadData()
             }
+        // Добавила для принудительной отметки
+        recordStore.save(TrackerRecord(trackerId: trackerId, date: Calendar.current.startOfDay(for: currentDate)))
+        DispatchQueue.main.async {
+                    self.collectionView.reloadData()
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            self.loadData()
+                }
             return true
-        } catch {
-            return false
-        }
+        } 
        /* if isCompleted {
             let record = TrackerRecord(trackerId: trackerId, date: currentDate)
             completedTrackers.append(record)
@@ -534,5 +537,5 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         return true*/
         
     }
-}
+
 
