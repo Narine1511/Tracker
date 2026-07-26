@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 final class CategoryViewController: UIViewController {
     private let data = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"]
     private let tableVie = UITableView()

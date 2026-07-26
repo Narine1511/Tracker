@@ -64,16 +64,21 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
             textLabel.bottomAnchor.constraint(equalTo: colorView.bottomAnchor, constant: -12)])
         
         // Настройка эмодзи
-        emoji.font = .systemFont(ofSize: 24)
-        emoji.layer.cornerRadius = 12
-        emoji.backgroundColor = .ypWhite30
+        emoji.font = .systemFont(ofSize: 12)
         emoji.textAlignment = .center
+        /*emoji.baselineAdjustment = .alignCenters*/
+        emoji.contentMode = .center
+        
+        emoji.backgroundColor = .ypWhite30
+        emoji.layer.cornerRadius = 12
+        
         emoji.clipsToBounds = true
         colorView.addSubview(emoji)
         emoji.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-            emoji.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
+          
+           emoji.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
             emoji.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
             emoji.heightAnchor.constraint(equalToConstant: 24),
             emoji.widthAnchor.constraint(equalToConstant: 24)
@@ -113,11 +118,12 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         self.completionCount = count
         
         contentView.backgroundColor = .ypWhite
-        colorView.backgroundColor = .ypGreen
+        colorView.backgroundColor = UIColor(named: tracker.color) ?? .ypGreen
         emoji.text = tracker.emoji
         textLabel.text = tracker.label
         textLabel.textColor = .ypWhite
         countLabel.text = "\(count) дней"
+
         updateButton()
         
     }
@@ -148,7 +154,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         }
         countLabel.text = "\(completionCount) дней"
        updateButton()
-        /*delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)*/
+        delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)
     }
 
 }

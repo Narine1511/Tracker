@@ -11,7 +11,7 @@ protocol NewTrackerDelegate: AnyObject {
     func didCreateTracker(_ tracker: Tracker, category: String)
 }
 
-final class NewTrackerController: UIViewController {
+final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/ {
     
     weak var delegate: NewTrackerDelegate?
     
@@ -19,10 +19,14 @@ final class NewTrackerController: UIViewController {
     private var trackerName: String = ""
     private let categoryName = "Важное"
     private let schedule: [Weekday] = [.monday, .tuesday, .wednesday, .thursday, .friday]
+    private let emojies = ["🙂", "😻", "🌺", "🐶", "❤️", "😱", "😇", "😡", "🥶", "🤔", "🙌", "🍔", "🥦", "🏓", "🥇", "🎸", "🏝", "😪"]
+    private let colors = ["ypCoral", "ypDarkBlue", "ypLavender", "ypLightBlue1", "ypLightBlue", "ypLightGreen", "ypLightOrange", "ypLightPink1", "ypLightPink", "ypLightRed", "ypLilac", "ypMagenta", "ypMint", "ypPeach", "ypPurple", "ypSoftPink", "ypTurquoise", "ypViolet"]
+
     private let data = ["Категория", "Расписание"]
     private let tableView = UITableView()
     private var selectedScheule: [Weekday] = []
-    
+    private var selectedEmoji: String = "🧚‍♀️"
+    private var selectedColor: String = "ypPowderRose"
     // Заголовок
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -89,6 +93,33 @@ final class NewTrackerController: UIViewController {
         return saveButton
     }()
     
+  /*  // Заголовок для эмодзи
+    private let titleLabelEmoji: UILabel = {
+        let label = UILabel()
+        label.text = "Эмодзи"
+        label.font = UIFont.systemFont(ofSize: 19, weight: .bold)
+        label.textColor = .ypBlack
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()*/
+    
+    
+    // Эмодзи
+    private let emojiesView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 5
+        layout.itemSize = CGSize(width: 52, height: 52)
+        
+        let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        /*collectionview.backgroundColor = .ypLightGray*/
+        collectionview.translatesAutoresizingMaskIntoConstraints = false
+        collectionview.register(EmojiColorViewCell.self, forCellWithReuseIdentifier: "EmojiColorViewCell")
+        collectionview.register(SectionHeaderEmojiesAndColorsView.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                withReuseIdentifier: "SectionHeaderEmojiesAndColorsView"
+                            )
+        return collectionview
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -101,6 +132,8 @@ final class NewTrackerController: UIViewController {
         view.addSubview(tableViewTracker)
         view.addSubview(cancelButton)
         view.addSubview(saveButton)
+        /*view.addSubview(titleLabelEmoji)*/
+        view.addSubview(emojiesView)
         
         
         NSLayoutConstraint.activate([
@@ -127,15 +160,32 @@ final class NewTrackerController: UIViewController {
             // Кнопка "Отменить"
             cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
             cancelButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -34),
+            cancelButton.topAnchor.constraint(equalTo: emojiesView.bottomAnchor, constant: 16),
             cancelButton.heightAnchor.constraint(equalToConstant: 60),
             cancelButton.widthAnchor.constraint(equalToConstant: 166),
             
             // Кнопка "Сохранить"
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             saveButton.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -34),
+            saveButton.topAnchor.constraint(equalTo: emojiesView.bottomAnchor, constant: 16),
             saveButton.heightAnchor.constraint(equalToConstant: 60),
-            saveButton.widthAnchor.constraint(equalToConstant: 166)
+            saveButton.widthAnchor.constraint(equalToConstant: 166),
+        
+        /*    // Заголовок для эмодзи
+            titleLabelEmoji.topAnchor.constraint(equalTo: tableViewTracker.bottomAnchor, constant: 32),
+            titleLabelEmoji.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
+            titleLabelEmoji.heightAnchor.constraint(equalToConstant: 18),
+            /*titleLabelEmoji.widthAnchor.constraint(equalToConstant: 52),*/*/
+            
+            
+        // Эмодзи
+            
+            emojiesView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 18),
+            emojiesView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -19),
+            emojiesView.topAnchor.constraint(equalTo: tableViewTracker.bottomAnchor, constant: 32),
+            emojiesView.heightAnchor.constraint(equalToConstant: 400)
         ])
+        
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
          tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
@@ -146,6 +196,8 @@ final class NewTrackerController: UIViewController {
         
         tableViewTracker.dataSource = self
         tableViewTracker.delegate = self
+        emojiesView.dataSource = self
+        emojiesView.delegate = self
 
     }
     
@@ -170,18 +222,19 @@ final class NewTrackerController: UIViewController {
         // Логика сохранения
         guard !trackerName.isEmpty else {return}
         guard !selectedScheule.isEmpty else {
+
             return
         }
         
         let tracker = Tracker(
             id: UUID(),
             label: trackerName,
-            color: "ypBlue",
-            emoji: "🧚‍♀️",
+            color: selectedColor,
+            emoji: selectedEmoji,
             timetable: TrackerSchedule(days: selectedScheule)
         )
-        print("🔵 Проверка делегата: \(delegate != nil ? "ЕСТЬ ✅" : "НЕТ ❌")")
-        delegate?.didCreateTracker(tracker, category: "Важное")
+
+        delegate?.didCreateTracker(tracker, category: "Все категории"/*"Важное"*/)
         
         dismiss(animated: true)
     }
@@ -214,9 +267,7 @@ extension NewTrackerController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-              print("Индекс: \(indexPath.row)")
-              print("Текст: \(data[indexPath.row])")
-              print("tableViewTracker: \(tableViewTracker)")
+              
         tableView.deselectRow(at: indexPath, animated: true)
             
             switch indexPath.row {
@@ -241,6 +292,75 @@ extension NewTrackerController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+}
+
+extension NewTrackerController: UICollectionViewDataSource {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 2
+    }
+    
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        if section == 0 {
+            return emojies.count
+        } else {
+            return colors.count
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        guard let cell = collectionView.dequeueReusableCell(
+            withReuseIdentifier: "EmojiColorViewCell",
+            for: indexPath
+        ) as? EmojiColorViewCell else {
+            return UICollectionViewCell()
+        }
+        if indexPath.section == 0 {
+            let emoji = emojies[indexPath.item]
+            cell.configureAsEmoji(emoji, isSelected: selectedEmoji == emoji)
+        } else {
+            let color = colors[indexPath.item]
+            cell.configureAsColor(color, isSelected: selectedColor == color)
+        }
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        guard kind == UICollectionView.elementKindSectionHeader
+        else {
+            return UICollectionReusableView()
+        }
+        guard let header = collectionView.dequeueReusableSupplementaryView(
+            ofKind: kind,
+            withReuseIdentifier: "SectionHeaderEmojiesAndColorsView",
+            for: indexPath
+        ) as? SectionHeaderEmojiesAndColorsView else {
+            return UICollectionReusableView()
+        }
+        if indexPath.section == 0 {
+            header.configure(with: "Эмодзи")
+        } else {
+            header.configure(with: "Цвета")
+        }
+        return header
+    }
+}
+
+
+extension NewTrackerController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if indexPath.section == 0 {
+            selectedEmoji = emojies[indexPath.item]
+        } else {
+            selectedColor = colors[indexPath.item]
+        }
+        collectionView.reloadData()
+    }
+}
+extension NewTrackerController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        return CGSize(width: collectionView.bounds.width, height: 40)
     }
 }
 
