@@ -245,6 +245,7 @@ class ViewController: UIViewController {
         let newTrackerVC = NewTrackerController()
         newTrackerVC.delegate = self
         let navController = UINavigationController(rootViewController: newTrackerVC)
+        navController.modalPresentationStyle = .pageSheet
         present(navController, animated: true)
     }
     

@@ -102,8 +102,7 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
         request.predicate = NSPredicate(
             format: "trackerId == %@ AND date == %@",
         trackerId as CVarArg,
-        startOfDay as CVarArg,
-            endOfDay as CVarArg
+        startOfDay as CVarArg
         )
         /*request.fetchLimit = 1
         let count = try? context.count(for: request)
