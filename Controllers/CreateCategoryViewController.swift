@@ -98,7 +98,7 @@ final class CreateCategoryController: UIViewController {
     }
     
     @objc private func createTapped() {
-        viewModel.createCategory(name: nameTextField.text ?? "")
+        viewModel.createCategory(/*name: nameTextField.text ?? ""*/)
         print("Нажали на кнопку создания категории")
         // onCategoryCreated вызовет didCreateCategory в CategoryViewController
         dismiss(animated: true, completion: nil)

@@ -114,23 +114,138 @@ class ViewController: UIViewController {
     }
     
     private func loadData() {
-        let allTrackers = trackerStore.fetchAll()
-        let category = TrackerCategory(
-            title: defaultCategoryTitle,
-            trackers: allTrackers
-        )
-        categories = [category]
+        /*  let allTrackers = trackerStore.fetchAll()
+         let category = TrackerCategory(
+         title: defaultCategoryTitle,
+         trackers: allTrackers
+         )
+         categories = [category]
+         
+         let allRecords = recordStore.fetchAll()
+         var newCount: [UUID: Int] = [:]
+         for record in allRecords {
+         newCount[record.trackerId, default: 0] += 1
+         }
+         trackerRecordCount = newCount
+         completedTrackers = allRecords
+         updateTrackersForCurrentDate()*/
         
+        let allTrackers = trackerStore.fetchAll()
         let allRecords = recordStore.fetchAll()
+        
         var newCount: [UUID: Int] = [:]
         for record in allRecords {
             newCount[record.trackerId, default: 0] += 1
         }
-       trackerRecordCount = newCount
+        trackerRecordCount = newCount
         completedTrackers = allRecords
+        
+        var groupCategories: [TrackerCategory] = []
+        for tracker in allTrackers {
+            if let category = tracker.category {
+                if let index = groupCategories.firstIndex(where: {$0.id == category.id}) {
+                    let old = groupCategories[index]
+                    let updatedTrackers = old.trackers + [tracker]
+                    groupCategories[index] = TrackerCategory(
+                        id: old.id,
+                        title: old.title,
+                        trackers: updatedTrackers
+                    )
+                } else {
+                    groupCategories.append(TrackerCategory(
+                        id: category.id,
+                        title: category.title,
+                        trackers: [tracker]
+                    ))
+                }
+            } else {
+                if let index = groupCategories.firstIndex(where: {$0.title == "Без категории"}) {
+                    let old = groupCategories[index]
+                    let updatedTrackers = old.trackers + [tracker]
+                    groupCategories[index] = TrackerCategory(
+                        id: old.id,
+                        title: old.title,
+                        trackers: updatedTrackers
+                    )
+                } else {
+                    groupCategories.append(TrackerCategory(
+                        title: "Без категории",
+                        trackers: [tracker]
+                    ))
+                }
+            }
+        }
+        categories = groupCategories
         updateTrackersForCurrentDate()
-
     }
+    
+    /*   let allTrackers = trackerStore.fetchAll()
+     
+     print("📦 ЗАГРУЖЕНО ТРЕКЕРОВ: \(allTrackers.count)")
+     for tracker in allTrackers {
+     print("   - \(tracker.label): категория \(tracker.category?.title ?? "nil")")
+     }
+     
+     var groupedCategories: [TrackerCategory] = []
+     
+     for tracker in allTrackers {
+     if let category = tracker.category {
+     print("🔍 Трекер \(tracker.label) имеет категорию: \(category.title)")
+     
+     if let index = groupedCategories.firstIndex(where: { $0.id == category.id }) {
+     let old = groupedCategories[index]
+     let updatedTrackers = old.trackers + [tracker]
+     groupedCategories[index] = TrackerCategory(
+     id: old.id,
+     title: old.title,
+     trackers: updatedTrackers
+     )
+     print("   - Категория \(category.title) обновлена")
+     } else {
+     groupedCategories.append(TrackerCategory(
+     id: category.id,
+     title: category.title,
+     trackers: [tracker]
+     ))
+     print("   - Создана новая категория: \(category.title)")
+     }
+     } else {
+     print("⚠️ Трекер \(tracker.label) БЕЗ категории")
+     if let index = groupedCategories.firstIndex(where: { $0.title == "Без категории" }) {
+     let old = groupedCategories[index]
+     let updatedTrackers = old.trackers + [tracker]
+     groupedCategories[index] = TrackerCategory(
+     id: old.id,
+     title: old.title,
+     trackers: updatedTrackers
+     )
+     } else {
+     groupedCategories.append(TrackerCategory(
+     title: "Без категории",
+     trackers: [tracker]
+     ))
+     }
+     }
+     }
+     
+     categories = groupedCategories
+     
+     print("📂 ИТОГО КАТЕГОРИЙ: \(categories.count)")
+     for category in categories {
+     print("   - \(category.title): \(category.trackers.count) трекеров")
+     }
+     
+     // ✅ СЧЕТЧИКИ
+     let allRecords = recordStore.fetchAll()
+     var newCount: [UUID: Int] = [:]
+     for record in allRecords {
+     newCount[record.trackerId, default: 0] += 1
+     }
+     trackerRecordCount = newCount
+     completedTrackers = allRecords
+     
+     updateTrackersForCurrentDate()
+     }*/
     
     // MARK: - Настройка UI
     private func setupUI() {
@@ -199,26 +314,26 @@ class ViewController: UIViewController {
     // MARK: - Настройка данных
     private func setupInitialData() {
         /*let tracker1 = Tracker(
-            id: UUID(),
-            label: "Пить воду",
-            color: "#4A90D9",
-            emoji: "💧",
-            timetable: .init(days: [.monday]))
-        let tracker2 = Tracker(
-            id: UUID(),
-            label: "Есть фрукты",
-            color: "#4A90D9",
-            emoji: "💧",
-            timetable: .init(days: [.friday]))
-        
-        let category1 = TrackerCategory(
-            title: "Здоровье",
-            trackers: [tracker1, tracker2]
-        )
-        categories = [category1]
-        trackers = categories.flatMap { $0.trackers }
-        /*collectionView.reloadData()*/
-        updateTrackersForCurrentDate()*/
+         id: UUID(),
+         label: "Пить воду",
+         color: "#4A90D9",
+         emoji: "💧",
+         timetable: .init(days: [.monday]))
+         let tracker2 = Tracker(
+         id: UUID(),
+         label: "Есть фрукты",
+         color: "#4A90D9",
+         emoji: "💧",
+         timetable: .init(days: [.friday]))
+         
+         let category1 = TrackerCategory(
+         title: "Здоровье",
+         trackers: [tracker1, tracker2]
+         )
+         categories = [category1]
+         trackers = categories.flatMap { $0.trackers }
+         /*collectionView.reloadData()*/
+         updateTrackersForCurrentDate()*/
         loadData()
     }
     
@@ -252,18 +367,18 @@ class ViewController: UIViewController {
     // MARK: - Методы работы с трекерами
     func addTracker(tracker: Tracker, categoryTitle: String) {
         /*let updateCategories = categories.map { category in
-            if category.title == categoryTitle {
-                let updateTrackers = category.trackers + [tracker]
-                return TrackerCategory(
-                    title: category.title,
-                    trackers: updateTrackers
-                )
-            }
-            return category
-        }
-        categories = updateCategories
-        trackers = categories.flatMap { $0.trackers }
-        updateTrackersForCurrentDate()*/
+         if category.title == categoryTitle {
+         let updateTrackers = category.trackers + [tracker]
+         return TrackerCategory(
+         title: category.title,
+         trackers: updateTrackers
+         )
+         }
+         return category
+         }
+         categories = updateCategories
+         trackers = categories.flatMap { $0.trackers }
+         updateTrackersForCurrentDate()*/
         trackerStore.save(tracker)
     }
     
@@ -279,18 +394,18 @@ class ViewController: UIViewController {
         }
     }
     private func updateTrackersForCurrentDate() {
-       
+        
         let calendar = Calendar.current
         // Узнаём число дня недели из Date
         let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
         print(" Всего категорий: \(categories.count)")
-            for category in categories {
-                print(" Категория: \(category.title), трекеров: \(category.trackers.count)")
-                for tracker in category.trackers {
-                    let days = tracker.timetable.days.map { $0.rawValue }
-                    let numbers = tracker.timetable.days.map { $0.numberInCalendar }
-                }
+        for category in categories {
+            print(" Категория: \(category.title), трекеров: \(category.trackers.count)")
+            for tracker in category.trackers {
+                let days = tracker.timetable.days.map { $0.rawValue }
+                let numbers = tracker.timetable.days.map { $0.numberInCalendar }
             }
+        }
         
         filteredCategories = categories.map { category in
             let filteredTrackers = category.trackers.filter {tracker in
@@ -334,30 +449,33 @@ final class SectionHeaderView: UICollectionReusableView {
 // MARK: - NewTrackerDelegate
 extension ViewController: NewTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
+        print("✅ Получен трекер: \(tracker.label)")
+        print("✅ Категория: \(category)")
         trackerStore.save(tracker)
+        loadData()
         /*if let index = categories.firstIndex(where: { $0.title == category }) {
-            let oldCategory = categories[index]
-            let updateTrackers = oldCategory.trackers + [tracker]
-            let newCategory = TrackerCategory(
-                title: oldCategory.title,
-                trackers: updateTrackers
-            )
-            categories[index] = newCategory
-        } else {
-            let newCategory = TrackerCategory(
-                title: category,
-                trackers: [tracker]
-            )
-            categories.append(newCategory)
-        }
-        
-        /*updateTrackersForCurrentDate()
-        print("Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")*/
-        do {
-            try trackerStore.save(tracker)
-        } catch {
-            print("Ошибка сохранения: \(error)")
-        }*/
+         let oldCategory = categories[index]
+         let updateTrackers = oldCategory.trackers + [tracker]
+         let newCategory = TrackerCategory(
+         title: oldCategory.title,
+         trackers: updateTrackers
+         )
+         categories[index] = newCategory
+         } else {
+         let newCategory = TrackerCategory(
+         title: category,
+         trackers: [tracker]
+         )
+         categories.append(newCategory)
+         }
+         
+         /*updateTrackersForCurrentDate()
+          print("Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")*/
+         do {
+         try trackerStore.save(tracker)
+         } catch {
+         print("Ошибка сохранения: \(error)")
+         }*/
     }
 }
 
@@ -382,15 +500,15 @@ extension ViewController: UICollectionViewDataSource {
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
         
         //Проверяем, выполнен ли трекер в currentDate
-       /* let isCompleted = completedTrackers.contains {record in
-            record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
-        }*/
+        /* let isCompleted = completedTrackers.contains {record in
+         record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
+         }*/
         let allRecords = recordStore.fetchAll()
         /*let count = allRecords.filter { $0.trackerId == tracker.id }.count*/
         
         let context = AppDelegate.shared.context
         let request = TrackerRecordCoreData.fetchRequest()
-            request.predicate = NSPredicate(format: "trackerId == %@", tracker.id as CVarArg)
+        request.predicate = NSPredicate(format: "trackerId == %@", tracker.id as CVarArg)
         let count = (try? context.count(for: request)) ?? 0
         
         let isCompleted = recordStore.isRecorded(
@@ -499,43 +617,43 @@ extension ViewController: TrackersCollectionViewCellDelegate {
             
         }
         
-            if isCompleted {
-                // Снимаем отметку
-                let record = TrackerRecord(
-                    trackerId: trackerId,
-                    date: selectedDate)
-                recordStore.delete(record)
-                loadData()
-            } else {
-                // Отмечаем выполнение
-                let record = TrackerRecord(
-                    trackerId: trackerId,
-                    date: selectedDate)
-                recordStore.save(record)
-                
-                loadData()
-            }
+        if isCompleted {
+            // Снимаем отметку
+            let record = TrackerRecord(
+                trackerId: trackerId,
+                date: selectedDate)
+            recordStore.delete(record)
+            loadData()
+        } else {
+            // Отмечаем выполнение
+            let record = TrackerRecord(
+                trackerId: trackerId,
+                date: selectedDate)
+            recordStore.save(record)
+            
+            loadData()
+        }
         // Добавила для принудительной отметки
         recordStore.save(TrackerRecord(trackerId: trackerId, date: Calendar.current.startOfDay(for: currentDate)))
         DispatchQueue.main.async {
-                    self.collectionView.reloadData()
+            self.collectionView.reloadData()
             self.collectionView.collectionViewLayout.invalidateLayout()
             self.loadData()
-                }
-            return true
-        } 
-       /* if isCompleted {
-            let record = TrackerRecord(trackerId: trackerId, date: currentDate)
-            completedTrackers.append(record)
-        } else {
-            completedTrackers.removeAll {
-                $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: currentDate)
-            }
         }
-        /*saveCompletedTrackers()*/
-        updateTrackersForCurrentDate()
-        return true*/
-        
+        return true
     }
+    /* if isCompleted {
+     let record = TrackerRecord(trackerId: trackerId, date: currentDate)
+     completedTrackers.append(record)
+     } else {
+     completedTrackers.removeAll {
+     $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: currentDate)
+     }
+     }
+     /*saveCompletedTrackers()*/
+     updateTrackersForCurrentDate()
+     return true*/
+    
+}
 
 

@@ -128,6 +128,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let statisticNav = UINavigationController(rootViewController: statistic)
         
         let tabBarController = UITabBarController()
+        tabBarController.tabBar.layer.borderColor = UIColor.ypGray1.cgColor
+        tabBarController.tabBar.layer.borderWidth = 0.5
         tabBarController.viewControllers = [trackersNav, statisticNav]
         
         return tabBarController

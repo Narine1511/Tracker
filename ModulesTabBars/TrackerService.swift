@@ -13,13 +13,15 @@ struct Tracker {
     let color: String
     let emoji: String
     let timetable: TrackerSchedule
+    let category: TrackerCategory?
     
-    init(id: UUID, label: String, color: String, emoji: String, timetable: TrackerSchedule) {
+    init(id: UUID, label: String, color: String, emoji: String, timetable: TrackerSchedule, category: TrackerCategory? = nil) {
         self.id = id
         self.label = label
         self.color = color
         self.emoji = emoji
         self.timetable = timetable
+        self.category = category
     }
 }
 

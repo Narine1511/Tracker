@@ -38,6 +38,10 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
     // Создать новый трекер
     func save(_ tracker: Tracker) {
         
+        print("🟢🟢🟢 TrackerStore.save() ВЫЗВАН 🟢🟢🟢")
+            print("   - Название: \(tracker.label)")
+            print("   - Категория: \(tracker.category?.title ?? "nil")")
+        
         let entity = TrackerCoreData(context: context)
         updateEntity(entity, with: tracker)
             
@@ -90,6 +94,20 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
         let dayStrings = model.timetable.days.map { $0.rawValue }
         /*entity.days = dayStrings as NSObject*/
         entity.days = dayStrings.joined(separator: ",")
+        
+        if let category = model.category {
+            print("💾 Сохраняем категорию: \(category.title)")
+                let request = TrackerCategoryCoreData.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %@", category.id as CVarArg)
+                if let categoryEntity = try? context.fetch(request).first {
+                    entity.category = categoryEntity
+                    print("✅ Категория сохранена в Core Data")
+                    print("🔍 convertModel: entity.category = \(entity.category?.title ?? "nil")")
+                }
+            } else {
+                print("⚠️ Категория отсутствует")
+                entity.category = nil
+            }
     }
     
     private func convertModel(_ entity: TrackerCoreData) -> Tracker {
@@ -97,12 +115,23 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
         if let dayString = entity.days, !dayString.isEmpty {
                     days = dayString.split(separator: ",").compactMap { Weekday(rawValue: String($0)) }
                 }
+        
+        var category: TrackerCategory? = nil
+        if let categoryEntity = entity.category {
+            category = TrackerCategory(
+                id: categoryEntity.id ?? UUID(),
+                title: categoryEntity.title ?? "",
+                trackers: [])
+            print("📦 Загружена категория: \(category?.title ?? "nil")")
+        }
+        
         return Tracker(
             id: entity.id ?? UUID(),
             label: entity.label ?? "",
             color: entity.color ?? "",
             emoji: entity.emoji ?? "",
-            timetable: TrackerSchedule(days: days)
+            timetable: TrackerSchedule(days: days),
+            category: category
         )
     }
         func controllerDidChangeContent(_ controller: NSFetchedResultsController<any NSFetchRequestResult>) {

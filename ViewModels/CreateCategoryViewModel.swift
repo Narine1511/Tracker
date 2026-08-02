@@ -36,11 +36,14 @@ final class CreateCategoriesViewModel {
     }
     
     
-    func createCategory(name: String) {
+    func createCategory(/*name: String*/) {
         guard !categoryName.isEmpty else {
             return
         }
-        let category = TrackerCategory(title: categoryName, trackers: [])
+        let category = TrackerCategory(
+            id: UUID(),
+            title: categoryName,
+            trackers: [])
         trackerCategoryStore.save(category)
         onCategoryCreated?(category)
         

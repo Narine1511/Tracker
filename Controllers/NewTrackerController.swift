@@ -110,7 +110,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
     private let emojiesView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 5
-        layout.itemSize = CGSize(width: 52, height: 52)
+        layout.itemSize = CGSize(width: 50, height: 50)
         
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         /*collectionview.backgroundColor = .ypLightGray*/
@@ -216,20 +216,20 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
     @objc func saveTapped() {
         // Логика сохранения
         guard !trackerName.isEmpty else {return}
-        guard !selectedScheule.isEmpty else {
-
-            return
-        }
+        guard !selectedScheule.isEmpty else {return}
+        print("🔵 selectedCategory: \(selectedCategory?.title ?? "nil")")
+        print("🔵 selectedCategory?.title: \(selectedCategory?.title ?? "nil")")
         
         let tracker = Tracker(
             id: UUID(),
             label: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            timetable: TrackerSchedule(days: selectedScheule)
+            timetable: TrackerSchedule(days: selectedScheule),
+            category: selectedCategory ?? TrackerCategory(title: "Все категории", trackers: [])
         )
-
-        delegate?.didCreateTracker(tracker, category: "Все категории"/*"Важное"*/)
+        print("🔵 Трекер создан с категорией: \(tracker.category?.title ?? "nil")")
+        delegate?.didCreateTracker(tracker, category: selectedCategory?.title ?? "Все категории")
         
         dismiss(animated: true)
     }
@@ -240,10 +240,21 @@ extension NewTrackerController: UITableViewDataSource {
         return 2
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        /*let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)*/
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.textLabel?.text = data[indexPath.row]
         cell.backgroundColor = .background
         cell.selectionStyle = .default
+        
+        cell.detailTextLabel?.font = .systemFont(ofSize: 17)
+        cell.detailTextLabel?.textColor = .ypGray1
+        if indexPath.row == 0 {
+                    cell.detailTextLabel?.text = selectedCategory?.title ?? ""
+        } else {
+            let dayStrings = selectedScheule.map { $0.shortName }
+            cell.detailTextLabel?.text = dayStrings.isEmpty ? "" : dayStrings.joined(separator: ", ")
+        }
+
         return cell
     }
 }
@@ -365,6 +376,7 @@ extension NewTrackerController: UICollectionViewDelegateFlowLayout {
 }
 extension NewTrackerController: CategorySelectionDelegate {
     func didSelectCategory(_ category: TrackerCategory) {
+        print("✅ ВЫБРАНА КАТЕГОРИЯ: \(category.title)")
         selectedCategory = category
         let indexPath = IndexPath(row: 0, section: 0)
         tableViewTracker.reloadRows(at: [indexPath], with: .automatic)

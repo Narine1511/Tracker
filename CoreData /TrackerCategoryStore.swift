@@ -43,6 +43,7 @@ final class TrackerCategoryStore: NSObject, NSFetchedResultsControllerDelegate {
     // Создать категорию
     func save(_ category: TrackerCategory) {
         let entity = TrackerCategoryCoreData(context: context)
+        entity.id = category.id
         entity.title = category.title
         AppDelegate.shared.saveContext()
         }
