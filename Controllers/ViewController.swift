@@ -610,15 +610,19 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         let calendar = Calendar.current
         let today = calendar.startOfDay(for: Date())
         let selectedDate = calendar.startOfDay(for: currentDate)
+        print("   - selectedDate: \(selectedDate)")
+                print("   - today: \(today)")
+                print("   - selectedDate > today: \(selectedDate > today)")
         
         if selectedDate > today {
-            
+            print("❌ БУДУЩАЯ ДАТА! ВОЗВРАЩАЕМ false")
             return false
             
         }
-        
+        print("✅ ДАТА НОРМАЛЬНАЯ, ПРОДОЛЖАЕМ")
         if isCompleted {
             // Снимаем отметку
+            print("🗑️ isCompleted = true → УДАЛЯЕМ")
             let record = TrackerRecord(
                 trackerId: trackerId,
                 date: selectedDate)
@@ -626,6 +630,7 @@ extension ViewController: TrackersCollectionViewCellDelegate {
             loadData()
         } else {
             // Отмечаем выполнение
+            print("💾 isCompleted = false → СОХРАНЯЕМ")
             let record = TrackerRecord(
                 trackerId: trackerId,
                 date: selectedDate)
@@ -634,7 +639,7 @@ extension ViewController: TrackersCollectionViewCellDelegate {
             loadData()
         }
         // Добавила для принудительной отметки
-        recordStore.save(TrackerRecord(trackerId: trackerId, date: Calendar.current.startOfDay(for: currentDate)))
+        /*recordStore.save(TrackerRecord(trackerId: trackerId, date: Calendar.current.startOfDay(for: currentDate)))*/
         DispatchQueue.main.async {
             self.collectionView.reloadData()
             self.collectionView.collectionViewLayout.invalidateLayout()

@@ -29,7 +29,7 @@ final class CreateCategoryController: UIViewController {
         let textField = UITextField()
         textField.placeholder = "Введите название категории"
         textField.layer.cornerRadius = 12
-        textField.backgroundColor = .ypGray
+        textField.backgroundColor = .ypLightGray
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))

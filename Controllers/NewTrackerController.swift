@@ -43,7 +43,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 12
-        textField.backgroundColor = .background
+        textField.backgroundColor = .ypGrayLight
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
@@ -243,7 +243,7 @@ extension NewTrackerController: UITableViewDataSource {
         /*let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)*/
         let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.textLabel?.text = data[indexPath.row]
-        cell.backgroundColor = .background
+        cell.backgroundColor = .ypGrayLight
         cell.selectionStyle = .default
         
         cell.detailTextLabel?.font = .systemFont(ofSize: 17)
@@ -253,6 +253,22 @@ extension NewTrackerController: UITableViewDataSource {
         } else {
             let dayStrings = selectedScheule.map { $0.shortName }
             cell.detailTextLabel?.text = dayStrings.isEmpty ? "" : dayStrings.joined(separator: ", ")
+        }
+        
+        let isLastRow = indexPath.row == 1
+        
+        if isLastRow {
+            cell.layer.cornerRadius = 12
+            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell.layer.masksToBounds = true
+            cell.separatorInset = UIEdgeInsets(
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: .greatestFiniteMagnitude)
+        } else {
+            cell.layer.cornerRadius = 0
+            cell.layer.masksToBounds = false
         }
 
         return cell

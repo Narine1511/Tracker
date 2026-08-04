@@ -12,7 +12,6 @@ protocol TrackersCollectionViewCellDelegate: AnyObject {
 
 final class TrackersCollectionViewCell: UICollectionViewCell {
     
-    /*  let titleLable = UILabel()*/
     let textLabel = UILabel()
     let emoji = UILabel()
     let complitebButton = UIButton()
@@ -77,8 +76,8 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         emoji.translatesAutoresizingMaskIntoConstraints = false
         
         NSLayoutConstraint.activate([
-          
-           emoji.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
+            
+            emoji.leftAnchor.constraint(equalTo: colorView.leftAnchor, constant: 12),
             emoji.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
             emoji.heightAnchor.constraint(equalToConstant: 24),
             emoji.widthAnchor.constraint(equalToConstant: 24)
@@ -123,38 +122,31 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         textLabel.text = tracker.label
         textLabel.textColor = .ypWhite
         countLabel.text = "\(count) дней"
-
+        
         updateButton()
         
     }
     private func updateButton() {
-     if isCompleted {
-     let image = UIImage(named: "button_ checkmark")
-         complitebButton.setImage(image, for: .normal)
-     } else {
-     let image = UIImage(named: "buttonCompleted")
-         complitebButton.setImage(image, for: .normal)
-     }
+        if isCompleted {
+            let image = UIImage(named: "button_ checkmark")
+            complitebButton.setImage(image, for: .normal)
+        } else {
+            let image = UIImage(named: "buttonCompleted")
+            complitebButton.setImage(image, for: .normal)
+        }
     }
     
     @objc private func buttonTapped() {
         guard let trackerId = trackerId else { return }
-        print("КНОПКА НАЖАТА!")
+        let currentState = isCompleted
+        let canChange = delegate?.didTapCompleteButton(for: trackerId, isCompleted: currentState) ?? false
         
-        let newState = !isCompleted
-        let canChange = delegate?.didTapCompleteButton(for: trackerId, isCompleted: newState) ?? false
-        if !canChange {return}
-        
-        
-        isCompleted = newState
-        if isCompleted {
-            completionCount += 1
-        } else {
-            completionCount -= 1
+        if canChange {
+           isCompleted = !currentState
+            completionCount += isCompleted ? 1 : -1
+            countLabel.text = "\(completionCount) дней"
+            updateButton()
         }
-        countLabel.text = "\(completionCount) дней"
-       updateButton()
-        delegate?.didTapCompleteButton(for: trackerId, isCompleted: isCompleted)
     }
-
+    
 }

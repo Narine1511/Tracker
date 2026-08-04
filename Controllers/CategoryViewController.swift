@@ -12,15 +12,13 @@ protocol CategorySelectionDelegate: AnyObject {
 
 final class CategoryViewController: UIViewController {
     
-    
     weak var delegate: CategorySelectionDelegate?
-    private var selectedCategory: TrackerCategory?
     private let viewModel = CategoriesViewModel()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "Категория"
-        label.tintColor = .ypBlack
+        label.textColor = .ypBlack
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -32,11 +30,8 @@ final class CategoryViewController: UIViewController {
         let tableView = UITableView()
         tableView.backgroundColor = .clear
         tableView.layer.cornerRadius = 12
-        /*tableView.separatorColor = .ypGray1*/
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         tableView.separatorStyle = .singleLine
-        
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         
         tableView.translatesAutoresizingMaskIntoConstraints = false
         return tableView
@@ -120,24 +115,41 @@ final class CategoryViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
         
+        tableView.register(CategoryViewCell.self, forCellReuseIdentifier: "CategoryViewCell")
+        
         setupUI()
         setupBindings()
         setupActions()
         viewModel.loadCategories()
-        updatePlaceholderVisibility()
     }
     
-    private func updatePlaceholderVisibility() {
-        let hasCategories = viewModel.countOfCategories() > 0
-        placeholderImageView.isHidden = hasCategories
-        placeholderLabel.isHidden = hasCategories
-        tableView.isHidden = !hasCategories
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel.loadCategories()
+        tableView.reloadData()
+        DispatchQueue.main.async {
+            for cell in self.tableView.visibleCells {
+                if let indexPath = self.tableView.indexPath(for: cell) {
+                    self.tableView.reloadRows(at: [indexPath], with: .none)
+                }
+            }
+        }
     }
     
     private func setupBindings() {
         viewModel.onCategoriesUpdate = { [weak self] in
             self?.tableView.reloadData()
-            self?.updatePlaceholderVisibility()
+        }
+        viewModel.onPlaceholderStateChange = {[weak self] shouldShow in
+            self?.placeholderImageView.isHidden = !shouldShow
+            self?.placeholderLabel.isHidden = !shouldShow
+            self?.tableView.isHidden = shouldShow
+        }
+        viewModel.onCategorySelected = { [weak self] category in
+            guard let self = self else { return }
+            self.delegate?.didSelectCategory(category)
+            self.dismiss(animated: true)
+            /*self?.navigationController?.popViewController(animated: true)*/
         }
     }
     private func setupActions() {
@@ -154,7 +166,20 @@ final class CategoryViewController: UIViewController {
 }
 extension CategoryViewController: CreateCategoryControllerDelegate {
     func didCreateCategory(_ category: TrackerCategory) {
-        viewModel.loadCategories()  // ← обновляем список
+        viewModel.loadCategories()
+        
+        tableView.reloadData()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            let count = self.viewModel.countOfCategories()
+            var indexPaths: [IndexPath] = []
+            for row in 0..<count - 1 {
+                indexPaths.append(IndexPath(row: row, section: 0))
+            }
+            if !indexPaths.isEmpty {
+                self.tableView.reloadRows(at: indexPaths, with: .none)
+            }
+        }
     }
 }
 
@@ -165,60 +190,35 @@ extension CategoryViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
-        cell.textLabel?.text = viewModel.categoryName(at: indexPath.row)
-        cell.backgroundColor = .ypGrayLight
-        cell.selectionStyle = .default
         
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryViewCell", for: indexPath) as? CategoryViewCell else {
+            return UITableViewCell()
+        }
+        
+        
+        let title = viewModel.categoryName(at: indexPath.row)
+        let isSelected = viewModel.isCategorySelected(at: indexPath.row)
         let isLastRow = indexPath.row == viewModel.countOfCategories() - 1
         
-        if isLastRow {
-            cell.layer.cornerRadius = 12
-            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
-            cell.layer.masksToBounds = true
-            cell.separatorInset = UIEdgeInsets(
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: .greatestFiniteMagnitude)
-        } else {
-            cell.layer.cornerRadius = 0
-            cell.layer.masksToBounds = false
-        }
+        cell.configure(with: title, isSelected: isSelected, isLastRow: isLastRow)
         
-        /*if indexPath.row == viewModel.countOfCategories() - 1 {
-            tableView.separatorStyle = .none
-        }*/
-            
-            if viewModel.isCategorySelected(at: indexPath.row) {
-                cell.accessoryType = .checkmark
-                cell.tintColor = .ypBlue
-            } else {
-                cell.accessoryType = .none
-            }
-            
-            return cell
-        }
+        return cell
     }
+}
 
-    // MARK: - UITableViewDelegate
-    
-    extension CategoryViewController: UITableViewDelegate {
-        func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            tableView.deselectRow(at: indexPath, animated: true)
-            guard let category = viewModel.category(at: indexPath.row) else {
-                return
-            }
-            viewModel.selectedCategory(at: indexPath.row)
-            delegate?.didSelectCategory(category)
-            navigationController?.popViewController(animated: true)
-            dismiss(animated: true, completion: nil)
-            
-        }
+// MARK: - UITableViewDelegate
+
+extension CategoryViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
         
-        func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            return 75
-        }
+        viewModel.selectedCategory(at: indexPath.row)
+        
     }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 75
+    }
+}
 
 
