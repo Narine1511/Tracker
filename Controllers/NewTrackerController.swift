@@ -27,6 +27,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
     private var selectedScheule: [Weekday] = []
     private var selectedEmoji: String = "🧚‍♀️"
     private var selectedColor: String = "ypPowderRose"
+    private var selectedCategory: TrackerCategory?
     // Заголовок
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -42,7 +43,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
         let textField = UITextField()
         textField.placeholder = "Введите название трекера"
         textField.layer.cornerRadius = 12
-        textField.backgroundColor = .background
+        textField.backgroundColor = .ypGrayLight
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 20))
@@ -59,6 +60,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
         tableView.layer.cornerRadius = 12
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
+        tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         
         return tableView
     }()
@@ -108,7 +110,7 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
     private let emojiesView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = 5
-        layout.itemSize = CGSize(width: 52, height: 52)
+        layout.itemSize = CGSize(width: 50, height: 50)
         
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         /*collectionview.backgroundColor = .ypLightGray*/
@@ -132,7 +134,6 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
         view.addSubview(tableViewTracker)
         view.addSubview(cancelButton)
         view.addSubview(saveButton)
-        /*view.addSubview(titleLabelEmoji)*/
         view.addSubview(emojiesView)
         
         
@@ -171,12 +172,6 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
             saveButton.heightAnchor.constraint(equalToConstant: 60),
             saveButton.widthAnchor.constraint(equalToConstant: 166),
         
-        /*    // Заголовок для эмодзи
-            titleLabelEmoji.topAnchor.constraint(equalTo: tableViewTracker.bottomAnchor, constant: 32),
-            titleLabelEmoji.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 28),
-            titleLabelEmoji.heightAnchor.constraint(equalToConstant: 18),
-            /*titleLabelEmoji.widthAnchor.constraint(equalToConstant: 52),*/*/
-            
             
         // Эмодзи
             
@@ -221,20 +216,20 @@ final class NewTrackerController: UIViewController/*, UICollectionViewDelegate*/
     @objc func saveTapped() {
         // Логика сохранения
         guard !trackerName.isEmpty else {return}
-        guard !selectedScheule.isEmpty else {
-
-            return
-        }
+        guard !selectedScheule.isEmpty else {return}
+        print("🔵 selectedCategory: \(selectedCategory?.title ?? "nil")")
+        print("🔵 selectedCategory?.title: \(selectedCategory?.title ?? "nil")")
         
         let tracker = Tracker(
             id: UUID(),
             label: trackerName,
             color: selectedColor,
             emoji: selectedEmoji,
-            timetable: TrackerSchedule(days: selectedScheule)
+            timetable: TrackerSchedule(days: selectedScheule),
+            category: selectedCategory ?? TrackerCategory(title: "Все категории", trackers: [])
         )
-
-        delegate?.didCreateTracker(tracker, category: "Все категории"/*"Важное"*/)
+        print("🔵 Трекер создан с категорией: \(tracker.category?.title ?? "nil")")
+        delegate?.didCreateTracker(tracker, category: selectedCategory?.title ?? "Все категории")
         
         dismiss(animated: true)
     }
@@ -245,10 +240,37 @@ extension NewTrackerController: UITableViewDataSource {
         return 2
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
+        /*let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)*/
+        let cell = UITableViewCell(style: .subtitle, reuseIdentifier: "cell")
         cell.textLabel?.text = data[indexPath.row]
-        cell.backgroundColor = .background
+        cell.backgroundColor = .ypGrayLight
         cell.selectionStyle = .default
+        
+        cell.detailTextLabel?.font = .systemFont(ofSize: 17)
+        cell.detailTextLabel?.textColor = .ypGray1
+        if indexPath.row == 0 {
+                    cell.detailTextLabel?.text = selectedCategory?.title ?? ""
+        } else {
+            let dayStrings = selectedScheule.map { $0.shortName }
+            cell.detailTextLabel?.text = dayStrings.isEmpty ? "" : dayStrings.joined(separator: ", ")
+        }
+        
+        let isLastRow = indexPath.row == 1
+        
+        if isLastRow {
+            cell.layer.cornerRadius = 12
+            cell.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+            cell.layer.masksToBounds = true
+            cell.separatorInset = UIEdgeInsets(
+                        top: 0,
+                        left: 0,
+                        bottom: 0,
+                        right: .greatestFiniteMagnitude)
+        } else {
+            cell.layer.cornerRadius = 0
+            cell.layer.masksToBounds = false
+        }
+
         return cell
     }
 }
@@ -273,7 +295,12 @@ extension NewTrackerController: UITableViewDelegate {
             switch indexPath.row {
             case 0:
                 let categoryVC = CategoryViewController()
-                present(categoryVC, animated: true, completion: nil)
+                categoryVC.delegate = self 
+                   /* navigationController?.pushViewController(categoryVC, animated: true)*/
+                
+                let navController = UINavigationController(rootViewController: categoryVC)
+                navController.modalPresentationStyle = .pageSheet
+                    present(navController, animated: true, completion: nil)
                 
             case 1:
                 let scheduleVC = ScheduleViewController()
@@ -361,6 +388,14 @@ extension NewTrackerController: UICollectionViewDelegate {
 extension NewTrackerController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
         return CGSize(width: collectionView.bounds.width, height: 40)
+    }
+}
+extension NewTrackerController: CategorySelectionDelegate {
+    func didSelectCategory(_ category: TrackerCategory) {
+        print("✅ ВЫБРАНА КАТЕГОРИЯ: \(category.title)")
+        selectedCategory = category
+        let indexPath = IndexPath(row: 0, section: 0)
+        tableViewTracker.reloadRows(at: [indexPath], with: .automatic)
     }
 }
 

@@ -19,6 +19,7 @@ final class EmojiColorViewCell: UICollectionViewCell {
         contentView.layer.cornerRadius = 5
         contentView.layer.masksToBounds = true
         setupUI()
+        contentView.clipsToBounds = false
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -43,8 +44,8 @@ final class EmojiColorViewCell: UICollectionViewCell {
         ])
         
         // Добавляем эмодзи
-        emojiLabel.font = .systemFont(ofSize: 24)
-        emojiLabel.layer.cornerRadius = 12
+        emojiLabel.font = .systemFont(ofSize: 32)
+        /*emojiLabel.layer.cornerRadius = 12*/
         emojiLabel.backgroundColor = .ypWhite30
         emojiLabel.textAlignment = .center
         emojiLabel.clipsToBounds = true
@@ -55,8 +56,8 @@ final class EmojiColorViewCell: UICollectionViewCell {
         NSLayoutConstraint.activate([
             emojiLabel.centerXAnchor.constraint(equalTo: colorView.centerXAnchor),
             emojiLabel.centerYAnchor.constraint(equalTo: colorView.centerYAnchor),
-            emojiLabel.heightAnchor.constraint(equalToConstant: 24),
-            emojiLabel.widthAnchor.constraint(equalToConstant: 24)
+            emojiLabel.heightAnchor.constraint(equalToConstant: 40),
+            emojiLabel.widthAnchor.constraint(equalToConstant: 40)
         ])
         
         

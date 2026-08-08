@@ -14,7 +14,7 @@ final class TrackerCategoryStore: NSObject, NSFetchedResultsControllerDelegate {
     
     private lazy var fetchedResultsController: NSFetchedResultsController<TrackerCategoryCoreData> = {
         let request = TrackerCategoryCoreData.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         
         let controller = NSFetchedResultsController(
             fetchRequest: request,
@@ -43,6 +43,7 @@ final class TrackerCategoryStore: NSObject, NSFetchedResultsControllerDelegate {
     // Создать категорию
     func save(_ category: TrackerCategory) {
         let entity = TrackerCategoryCoreData(context: context)
+        entity.id = category.id
         entity.title = category.title
         AppDelegate.shared.saveContext()
         }
