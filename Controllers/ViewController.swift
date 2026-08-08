@@ -20,6 +20,7 @@ class ViewController: UIViewController {
     private var trackerRecordCount: [UUID: Int] = [:]
     var trackers: [Tracker] = []
     private var currentDate: Date = Date()
+    
     private var filteredCategories: [TrackerCategory] = []
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -95,6 +96,9 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
         
+        /*let interaction = UIContextMenuInteraction(delegate: self)
+         view.addInteraction(interaction)*/
+        
         setupNavigationBar()
         setupUI()
         setupCollectionView()
@@ -114,21 +118,6 @@ class ViewController: UIViewController {
     }
     
     private func loadData() {
-        /*  let allTrackers = trackerStore.fetchAll()
-         let category = TrackerCategory(
-         title: defaultCategoryTitle,
-         trackers: allTrackers
-         )
-         categories = [category]
-         
-         let allRecords = recordStore.fetchAll()
-         var newCount: [UUID: Int] = [:]
-         for record in allRecords {
-         newCount[record.trackerId, default: 0] += 1
-         }
-         trackerRecordCount = newCount
-         completedTrackers = allRecords
-         updateTrackersForCurrentDate()*/
         
         let allTrackers = trackerStore.fetchAll()
         let allRecords = recordStore.fetchAll()
@@ -178,74 +167,6 @@ class ViewController: UIViewController {
         categories = groupCategories
         updateTrackersForCurrentDate()
     }
-    
-    /*   let allTrackers = trackerStore.fetchAll()
-     
-     print("📦 ЗАГРУЖЕНО ТРЕКЕРОВ: \(allTrackers.count)")
-     for tracker in allTrackers {
-     print("   - \(tracker.label): категория \(tracker.category?.title ?? "nil")")
-     }
-     
-     var groupedCategories: [TrackerCategory] = []
-     
-     for tracker in allTrackers {
-     if let category = tracker.category {
-     print("🔍 Трекер \(tracker.label) имеет категорию: \(category.title)")
-     
-     if let index = groupedCategories.firstIndex(where: { $0.id == category.id }) {
-     let old = groupedCategories[index]
-     let updatedTrackers = old.trackers + [tracker]
-     groupedCategories[index] = TrackerCategory(
-     id: old.id,
-     title: old.title,
-     trackers: updatedTrackers
-     )
-     print("   - Категория \(category.title) обновлена")
-     } else {
-     groupedCategories.append(TrackerCategory(
-     id: category.id,
-     title: category.title,
-     trackers: [tracker]
-     ))
-     print("   - Создана новая категория: \(category.title)")
-     }
-     } else {
-     print("⚠️ Трекер \(tracker.label) БЕЗ категории")
-     if let index = groupedCategories.firstIndex(where: { $0.title == "Без категории" }) {
-     let old = groupedCategories[index]
-     let updatedTrackers = old.trackers + [tracker]
-     groupedCategories[index] = TrackerCategory(
-     id: old.id,
-     title: old.title,
-     trackers: updatedTrackers
-     )
-     } else {
-     groupedCategories.append(TrackerCategory(
-     title: "Без категории",
-     trackers: [tracker]
-     ))
-     }
-     }
-     }
-     
-     categories = groupedCategories
-     
-     print("📂 ИТОГО КАТЕГОРИЙ: \(categories.count)")
-     for category in categories {
-     print("   - \(category.title): \(category.trackers.count) трекеров")
-     }
-     
-     // ✅ СЧЕТЧИКИ
-     let allRecords = recordStore.fetchAll()
-     var newCount: [UUID: Int] = [:]
-     for record in allRecords {
-     newCount[record.trackerId, default: 0] += 1
-     }
-     trackerRecordCount = newCount
-     completedTrackers = allRecords
-     
-     updateTrackersForCurrentDate()
-     }*/
     
     // MARK: - Настройка UI
     private func setupUI() {
@@ -313,27 +234,7 @@ class ViewController: UIViewController {
     
     // MARK: - Настройка данных
     private func setupInitialData() {
-        /*let tracker1 = Tracker(
-         id: UUID(),
-         label: "Пить воду",
-         color: "#4A90D9",
-         emoji: "💧",
-         timetable: .init(days: [.monday]))
-         let tracker2 = Tracker(
-         id: UUID(),
-         label: "Есть фрукты",
-         color: "#4A90D9",
-         emoji: "💧",
-         timetable: .init(days: [.friday]))
-         
-         let category1 = TrackerCategory(
-         title: "Здоровье",
-         trackers: [tracker1, tracker2]
-         )
-         categories = [category1]
-         trackers = categories.flatMap { $0.trackers }
-         /*collectionView.reloadData()*/
-         updateTrackersForCurrentDate()*/
+        
         loadData()
     }
     
@@ -366,19 +267,7 @@ class ViewController: UIViewController {
     
     // MARK: - Методы работы с трекерами
     func addTracker(tracker: Tracker, categoryTitle: String) {
-        /*let updateCategories = categories.map { category in
-         if category.title == categoryTitle {
-         let updateTrackers = category.trackers + [tracker]
-         return TrackerCategory(
-         title: category.title,
-         trackers: updateTrackers
-         )
-         }
-         return category
-         }
-         categories = updateCategories
-         trackers = categories.flatMap { $0.trackers }
-         updateTrackersForCurrentDate()*/
+        
         trackerStore.save(tracker)
     }
     
@@ -393,6 +282,43 @@ class ViewController: UIViewController {
             completedTrackers.append(TrackerRecord(trackerId: trackerId, date: date))
         }
     }
+    
+    private func deleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
+        let alert = UIAlertController(title: nil, message: "Уверены что хотите удалить трекер?", preferredStyle: .actionSheet
+        )
+        
+        let cancelAction = UIAlertAction(title: "Отменить", style: .cancel)
+        let deleteAction = UIAlertAction(title: "Удалить", style: .destructive) { [weak self] _ in
+            self?.performDeleteTracker(tracker, at: indexPath)
+        }
+        alert.addAction(cancelAction)
+        alert.addAction(deleteAction)
+        
+        present(alert, animated: true)
+    }
+    
+    private func performDeleteTracker(_ tracker: Tracker, at indexPath: IndexPath) {
+        
+        do {
+                try trackerStore.delete(tracker)
+            } catch {
+                print("❌ Ошибка удаления: \(error)")
+                return
+            }
+        updateTrackersForCurrentDate()
+        updatePlaceholderVisibility()
+    }
+    
+    private func editTracker(_ tracker: Tracker) {
+        let recordCount = trackerRecordCount[tracker.id] ?? 0
+        print("🔵 recordCount в ViewController: \(recordCount)") 
+        let editVC = EditTrackerController(tracker: tracker, recordCount: recordCount)
+        editVC.delegate = self
+        let navController = UINavigationController(rootViewController: editVC)
+        navController.modalPresentationStyle = .pageSheet
+        present(navController, animated: true)
+    }
+    
     private func updateTrackersForCurrentDate() {
         
         let calendar = Calendar.current
@@ -453,29 +379,7 @@ extension ViewController: NewTrackerDelegate {
         print("✅ Категория: \(category)")
         trackerStore.save(tracker)
         loadData()
-        /*if let index = categories.firstIndex(where: { $0.title == category }) {
-         let oldCategory = categories[index]
-         let updateTrackers = oldCategory.trackers + [tracker]
-         let newCategory = TrackerCategory(
-         title: oldCategory.title,
-         trackers: updateTrackers
-         )
-         categories[index] = newCategory
-         } else {
-         let newCategory = TrackerCategory(
-         title: category,
-         trackers: [tracker]
-         )
-         categories.append(newCategory)
-         }
-         
-         /*updateTrackersForCurrentDate()
-          print("Экран обновлён, трекеров: \(categories.flatMap { $0.trackers }.count)")*/
-         do {
-         try trackerStore.save(tracker)
-         } catch {
-         print("Ошибка сохранения: \(error)")
-         }*/
+        
     }
 }
 
@@ -499,10 +403,7 @@ extension ViewController: UICollectionViewDataSource {
         }
         let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
         
-        //Проверяем, выполнен ли трекер в currentDate
-        /* let isCompleted = completedTrackers.contains {record in
-         record.trackerId == tracker.id && Calendar.current.isDate(record.date, inSameDayAs: currentDate)
-         }*/
+        
         let allRecords = recordStore.fetchAll()
         /*let count = allRecords.filter { $0.trackerId == tracker.id }.count*/
         
@@ -545,11 +446,6 @@ extension ViewController: UICollectionViewDataSource {
         layout collectionViewLayout: UICollectionViewLayout,
         referenceSizeForHeaderInSection section: Int
     ) -> CGSize {
-        // Проверяем, есть ли трекеры в этой секции
-        /*
-         if trackers.isEmpty {
-         return .zero
-         }*/
         
         return CGSize(width: collectionView.frame.width, height: 46)
     }
@@ -557,7 +453,75 @@ extension ViewController: UICollectionViewDataSource {
 
 // MARK: - UICollectionViewDelegate
 extension ViewController: UICollectionViewDelegate {
-    // Методы делегата при необходимости
+    func collectionView(_ collectionView: UICollectionView, contextMenuConfigurationForItemsAt indexPaths: [IndexPath], point: CGPoint) -> UIContextMenuConfiguration? {
+        guard let indexPath = indexPaths.first else { return nil}
+        guard let cell = collectionView.cellForItem(at: indexPath) as? TrackersCollectionViewCell else {
+            return nil
+        }
+        
+        let tracker = filteredCategories[indexPath.section].trackers[indexPath.item]
+        
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: {
+            let previewVC = UIViewController()
+            previewVC.view.backgroundColor = .clear
+            
+            let colorViewCopy = UIView()
+            colorViewCopy.backgroundColor = cell.colorView.backgroundColor
+            colorViewCopy.layer.cornerRadius = cell.colorView.layer.cornerRadius
+            colorViewCopy.frame = CGRect(x: 0, y: 0, width: cell.colorView.bounds.width, height: cell.colorView.bounds.height)
+            previewVC.view.addSubview(colorViewCopy)
+            colorViewCopy.translatesAutoresizingMaskIntoConstraints = false
+            
+            let textPreview = UILabel()
+            textPreview.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+            textPreview.textColor = .ypWhite
+            textPreview.text = cell.textLabel.text
+            colorViewCopy.addSubview(textPreview)
+            textPreview.translatesAutoresizingMaskIntoConstraints = false
+            
+            let emojiPreviw = UILabel()
+            emojiPreviw.font = .systemFont(ofSize: 12)
+            emojiPreviw.text = cell.emoji.text
+            emojiPreviw.textAlignment = .center
+            emojiPreviw.contentMode = .center
+            emojiPreviw.backgroundColor = .ypWhite30
+            emojiPreviw.layer.cornerRadius = 12
+            emojiPreviw.clipsToBounds = true
+            colorViewCopy.addSubview(emojiPreviw)
+            emojiPreviw.translatesAutoresizingMaskIntoConstraints = false
+            
+            NSLayoutConstraint.activate([
+                colorViewCopy.centerXAnchor.constraint(equalTo: previewVC.view.centerXAnchor),
+                colorViewCopy.centerYAnchor.constraint(equalTo: previewVC.view.centerYAnchor),
+                colorViewCopy.widthAnchor.constraint(equalToConstant: cell.colorView.bounds.width),
+                colorViewCopy.heightAnchor.constraint(equalToConstant: cell.colorView.bounds.height),
+                // Текст
+                textPreview.leadingAnchor.constraint(equalTo: colorViewCopy.leadingAnchor, constant: 12),
+                textPreview.trailingAnchor.constraint(equalTo: colorViewCopy.trailingAnchor, constant: -12),
+                textPreview.bottomAnchor.constraint(equalTo: colorViewCopy.bottomAnchor, constant: -12),
+                
+                // Эмодзи
+                emojiPreviw.leadingAnchor.constraint(equalTo: colorViewCopy.leadingAnchor, constant: 12),
+                emojiPreviw.topAnchor.constraint(equalTo: colorViewCopy.topAnchor, constant: 12),
+                emojiPreviw.heightAnchor.constraint(equalToConstant: 24),
+                emojiPreviw.widthAnchor.constraint(equalToConstant: 24),
+            ])
+            previewVC.preferredContentSize = cell.colorView.bounds.size
+            return previewVC
+        }) { _ in
+            
+            let editAction = UIAction(title: "Редактировать", image: nil) { [weak self] _ in
+                guard let self = self else {return}
+                self.editTracker(tracker)
+            }
+            
+            let deleteAction = UIAction(title: "Удалить", image: nil, attributes: .destructive) {[weak self] _ in
+                print("Удалить")
+                self?.deleteTracker(tracker, at: indexPath)
+            }
+            return UIMenu(title: "", children: [editAction, deleteAction])
+        }
+    }
 }
 extension ViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(
@@ -611,8 +575,8 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         let today = calendar.startOfDay(for: Date())
         let selectedDate = calendar.startOfDay(for: currentDate)
         print("   - selectedDate: \(selectedDate)")
-                print("   - today: \(today)")
-                print("   - selectedDate > today: \(selectedDate > today)")
+        print("   - today: \(today)")
+        print("   - selectedDate > today: \(selectedDate > today)")
         
         if selectedDate > today {
             print("❌ БУДУЩАЯ ДАТА! ВОЗВРАЩАЕМ false")
@@ -638,8 +602,6 @@ extension ViewController: TrackersCollectionViewCellDelegate {
             
             loadData()
         }
-        // Добавила для принудительной отметки
-        /*recordStore.save(TrackerRecord(trackerId: trackerId, date: Calendar.current.startOfDay(for: currentDate)))*/
         DispatchQueue.main.async {
             self.collectionView.reloadData()
             self.collectionView.collectionViewLayout.invalidateLayout()
@@ -647,18 +609,19 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         }
         return true
     }
-    /* if isCompleted {
-     let record = TrackerRecord(trackerId: trackerId, date: currentDate)
-     completedTrackers.append(record)
-     } else {
-     completedTrackers.removeAll {
-     $0.trackerId == trackerId && Calendar.current.isDate($0.date, inSameDayAs: currentDate)
-     }
-     }
-     /*saveCompletedTrackers()*/
-     updateTrackersForCurrentDate()
-     return true*/
     
 }
 
+// MARK: - EditTrackerDelegate
+
+extension ViewController: EditTrackerDelegate {
+    func didEditTracker(_ tracker: Tracker) {
+        do {
+            try trackerStore.update(tracker)
+            loadData()
+        } catch {
+            print("Ошибка: \(error)")
+        }
+    }
+}
 

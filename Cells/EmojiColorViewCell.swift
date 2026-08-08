@@ -98,7 +98,7 @@ final class EmojiColorViewCell: UICollectionViewCell {
     
     func configure(tracker: Tracker, isCompleted: Bool, count: Int) {
         
-        
+
     }
     
     override func prepareForReuse() {

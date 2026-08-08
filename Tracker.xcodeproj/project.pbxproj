@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		C0BBC26B300E202500730A55 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = C0BBC269300E202500730A55 /* Model.xcdatamodeld */; };
+		C0E7B34C302772550055EE78 /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = C0E7B34A302772550055EE78 /* Localizable.stringsdict */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,6 +33,8 @@
 		C0DDB2242FE574B3009A788D /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DDB23A2FE574B4009A788D /* TrackerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C0DDB2442FE574B4009A788D /* TrackerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TrackerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C0E7B34B302772550055EE78 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		C0E7B34D3027814A0055EE78 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = ru; path = ru.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -123,6 +126,7 @@
 		C0DDB21B2FE574B3009A788D = {
 			isa = PBXGroup;
 			children = (
+				C0E7B34A302772550055EE78 /* Localizable.stringsdict */,
 				C0BBC4273018F89300730A55 /* ViewModels */,
 				C0BBC26D300E742800730A55 /* CoreData  */,
 				C0BBC269300E202500730A55 /* Model.xcdatamodeld */,
@@ -253,6 +257,7 @@
 			knownRegions = (
 				en,
 				Base,
+				ru,
 			);
 			mainGroup = C0DDB21B2FE574B3009A788D;
 			minimizedProjectReferenceProxies = 1;
@@ -273,6 +278,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0E7B34C302772550055EE78 /* Localizable.stringsdict in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -329,6 +335,18 @@
 			targetProxy = C0DDB2452FE574B4009A788D /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		C0E7B34A302772550055EE78 /* Localizable.stringsdict */ = {
+			isa = PBXVariantGroup;
+			children = (
+				C0E7B34B302772550055EE78 /* en */,
+				C0E7B34D3027814A0055EE78 /* ru */,
+			);
+			name = Localizable.stringsdict;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		C0DDB24E2FE574B4009A788D /* Debug */ = {
@@ -390,6 +408,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -453,6 +472,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
