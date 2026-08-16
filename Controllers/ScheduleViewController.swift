@@ -108,33 +108,33 @@ extension ScheduleViewController: UITableViewDataSource {
     
     
     /*func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        selectedDays[indexPath.row].toggle()
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-        
-       switch indexPath.row {
-        case 0:
-            let categoryVC = CategoryViewController()
-            present(categoryVC, animated: true, completion: nil)
-            
-        case 1:
-            let scheduleVC = ScheduleViewController()
-            scheduleVC.title = dataSchedule[indexPath.row]
-            present(scheduleVC, animated: true, completion: nil)
-            
-        default:
-            break
-        }*/
-    }
+     tableView.deselectRow(at: indexPath, animated: true)
+     selectedDays[indexPath.row].toggle()
+     tableView.reloadRows(at: [indexPath], with: .automatic)
+     
+     switch indexPath.row {
+     case 0:
+     let categoryVC = CategoryViewController()
+     present(categoryVC, animated: true, completion: nil)
+     
+     case 1:
+     let scheduleVC = ScheduleViewController()
+     scheduleVC.title = dataSchedule[indexPath.row]
+     present(scheduleVC, animated: true, completion: nil)
+     
+     default:
+     break
+     }*/
+}
 
 extension ScheduleViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 75
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-            tableView.deselectRow(at: indexPath, animated: true)
-            selectedDays[indexPath.row].toggle()
-            tableView.reloadRows(at: [indexPath], with: .automatic)
-        }
+        tableView.deselectRow(at: indexPath, animated: true)
+        selectedDays[indexPath.row].toggle()
+        tableView.reloadRows(at: [indexPath], with: .automatic)
+    }
 }
 

@@ -76,19 +76,6 @@ class OnboardingViewController: UIPageViewController, UIPageViewControllerDataSo
     weak var sceneDelegate: SceneDelegate?
     
     lazy var pages: [UIViewController] = {
-        /* let blueScreen = UIViewController()
-         blueScreen.view.backgroundColor = .ypBlue
-         let labelForBlueScreen = UILabel()
-         labelForBlueScreen.text = "Отслеживайте только то, что хотите"
-         
-         
-         let pinkScreen = UIViewController()
-         pinkScreen.view.backgroundColor = .ypLilac
-         let labelForPinkScreen = UILabel()
-         labelForPinkScreen.text = "Даже еслиэто не литры воды и йога"
-         
-         
-         return [blueScreen, pinkScreen]*/
         
         let pageData: [(image: String, title: String, button: String)] = [
             ("onboardingBlueScreen", "Отслеживайте только то, что хотите", "Вот это технологии!" ),
