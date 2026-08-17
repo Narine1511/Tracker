@@ -12,6 +12,10 @@ protocol FilterViewControllerDelegate: AnyObject {
 }
 
 final class FilterViewController: UIViewController {
+    private enum UserDefaultsKeys {
+            static let selectedFilter = "selectedFilter"
+        }
+    
     private let dataFilters = ["Все трекеры", "Трекеры на сегодня", "Завершенные", "Не завершенные"]
     private var selectedFilterIndex: Int = 0
     var onFilterSelected: ((String) -> Void)?
@@ -21,6 +25,7 @@ final class FilterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
+        loadSavedFilter()
         
         let label = UILabel()
         label.text = "Фильтры"
@@ -54,7 +59,16 @@ final class FilterViewController: UIViewController {
         tableView.delegate = self
         
     }
+    private func loadSavedFilter() {
+            let savedFilter = UserDefaults.standard.string(forKey: UserDefaultsKeys.selectedFilter) ?? "Все трекеры"
+            selectedFilterIndex = dataFilters.firstIndex(of: savedFilter) ?? 0
+        }
+    
+    private func saveFilter(_ filter: String) {
+            UserDefaults.standard.set(filter, forKey: UserDefaultsKeys.selectedFilter)
+        }
 }
+
 extension FilterViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 4
@@ -84,6 +98,7 @@ extension FilterViewController: UITableViewDelegate {
        
         selectedFilterIndex = indexPath.row
         let selectedFilter = dataFilters[selectedFilterIndex]
+        saveFilter(selectedFilter)
         tableView.reloadData()
         
         onFilterSelected?(selectedFilter)

@@ -19,4 +19,16 @@ struct AnalyticsService {
             print("REPORT ERROR: %@", error.localizedDescription)
         })
     }
+    
+    func sendEvent(event: String, screen: String, item: String? = nil) {
+            var params: [String: Any] = [
+                "event": event,
+                "screen": screen
+            ]
+            
+            if let item = item {
+                params["item"] = item
+            }
+        report(event: "user_action", params: params)
+            }
 }

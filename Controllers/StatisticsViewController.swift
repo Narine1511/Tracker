@@ -66,6 +66,18 @@ final class StatisticsViewController: UIViewController {
         setupUI()
         setupCollectionView()
         setupBindings()
+        
+        NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(loadStatistics),
+                name: NSNotification.Name("UpdateStatistics"),
+                object: nil
+            )
+        }
+
+        deinit {
+            NotificationCenter.default.removeObserver(self)
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -116,7 +128,7 @@ final class StatisticsViewController: UIViewController {
         
     }
     
-    private func loadStatistics() {
+    @objc  private func loadStatistics() {
         let allRecords = recordStore.fetchAll()
         print("📦 Записей в Core Data: \(allRecords.count)")
         let allTrackers = trackerStore.fetchAll()
@@ -147,10 +159,10 @@ final class StatisticsViewController: UIViewController {
         let streak = calculateStreak(from: allRecords)
                 
                 statistics = [
-                    StatisticsItem(count: uniqueTrackers, title: "Трекеров выполнено"),
-                    StatisticsItem(count: totalCompletions, title: "Всего выполнений"),
-                    StatisticsItem(count: bestPeriod, title: "Лучший период"),
-                    StatisticsItem(count: streak, title: "Дней без пропусков")
+                    StatisticsItem(count: uniqueTrackers, title: "Лучший период"),
+                    StatisticsItem(count: totalCompletions, title: "Трекеров завершено"),
+                    StatisticsItem(count: bestPeriod, title: "Идеальные дни"),
+                    StatisticsItem(count: streak, title: "Среднее значение")
                 ]
                 
                 updateUI()
