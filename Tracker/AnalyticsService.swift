@@ -14,21 +14,19 @@ struct AnalyticsService {
         AppMetrica.activate(with: configuration)
     }
 
-    func report(event: String, params : [AnyHashable : Any]) {
+    func report(event: String, params : [String : Any]) {
         AppMetrica.reportEvent(name: event, parameters: params, onFailure: { error in
             print("REPORT ERROR: %@", error.localizedDescription)
         })
     }
-    
     func sendEvent(event: String, screen: String, item: String? = nil) {
             var params: [String: Any] = [
                 "event": event,
                 "screen": screen
             ]
-            
             if let item = item {
                 params["item"] = item
             }
-        report(event: "user_action", params: params)
-            }
-}
+            report(event: "user_action", params: params)
+        }
+    }

@@ -6,7 +6,7 @@
 //
 
 import UIKit
-import YandexMobileMetrica
+import AppMetricaCore
 class ViewController: UIViewController {
     
     // MARK: - Свойства
@@ -20,6 +20,7 @@ class ViewController: UIViewController {
     private var trackerRecordCount: [UUID: Int] = [:]
     var trackers: [Tracker] = []
     private var currentDate: Date = Date()
+    private let analyticsService = AnalyticsService()
     
     private var filteredCategories: [TrackerCategory] = []
     private var allCategories: [TrackerCategory] = []
@@ -181,13 +182,9 @@ class ViewController: UIViewController {
     }
     
     
-    
-    
-    
     @objc private func filterButtonTapped() {
         
-        let analytics = AnalyticsService()
-        analytics.sendEvent(event: "click", screen: "Main", item: "filter")
+        analyticsService.sendEvent(event: "click", screen: "Main", item: "filter")
         
         let filterVC = FilterViewController()
         
@@ -248,8 +245,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypWhite
         
-        let analytics = AnalyticsService()
-        analytics.sendEvent(event: "open", screen: "Main")
+        analyticsService.sendEvent(event: "open", screen: "Main")
         
         setupNavigationBar()
         setupUI()
@@ -261,7 +257,7 @@ class ViewController: UIViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
-            AnalyticsService().sendEvent(event: "close", screen: "Main")
+        analyticsService.sendEvent(event: "close", screen: "Main")
         }
     
     private func setupBindings() {
@@ -475,8 +471,7 @@ class ViewController: UIViewController {
     
     @objc private func addTrackerTapped() {
         
-        let analytics = AnalyticsService()
-        analytics.sendEvent(event: "click", screen: "Main", item: "add_track")
+        analyticsService.sendEvent(event: "click", screen: "Main", item: "add_track")
         
         let newTrackerVC = NewTrackerController()
         newTrackerVC.delegate = self
@@ -584,6 +579,7 @@ extension ViewController: NewTrackerDelegate {
     func didCreateTracker(_ tracker: Tracker, category: String) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
+            self.analyticsService.sendEvent(event: "create", screen: "Main", item: "tracker")
             print("✅ Получен трекер: \(tracker.label)")
             print("✅ Категория: \(category)")
             trackerStore.save(tracker)
@@ -722,8 +718,7 @@ extension ViewController: NewTrackerDelegate {
                 
                 let editAction = UIAction(title: "Редактировать", image: nil) { [weak self] _ in
                     
-                    let analytics = AnalyticsService()
-                    analytics.sendEvent(event: "click", screen: "Main", item: "edit")
+                    self?.analyticsService.sendEvent(event: "click", screen: "Main", item: "edit")
                     
                     guard let self = self else {return}
                     self.editTracker(tracker)
@@ -731,8 +726,7 @@ extension ViewController: NewTrackerDelegate {
                 
                 let deleteAction = UIAction(title: "Удалить", image: nil, attributes: .destructive) {[weak self] _ in
                     
-                    let analytics = AnalyticsService()
-                    analytics.sendEvent(event: "click", screen: "Main", item: "delete")
+                    self?.analyticsService.sendEvent(event: "click", screen: "Main", item: "delete")
                     
                     print("Удалить")
                     self?.deleteTracker(tracker, at: indexPath)
@@ -788,8 +782,8 @@ extension ViewController: NewTrackerDelegate {
 
 extension ViewController: TrackersCollectionViewCellDelegate {
     func didTapCompleteButton(for trackerId: UUID, isCompleted: Bool) -> Bool {
-        let analytics = AnalyticsService()
-        analytics.sendEvent(event: "click", screen: "Main", item: "track")
+        
+        analyticsService.sendEvent(event: "click", screen: "Main", item: "track")
         
         print("didTapCompleteButton ВЫЗВАН 🟢🟢🟢")
         
