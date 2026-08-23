@@ -10,9 +10,9 @@ import AppMetricaCore
 class ViewController: UIViewController {
     
     // MARK: - Свойства
-    private let trackerStore = TrackerStore()
+    /*private* let*/ var trackerStore: TrackerStoreProtocol = TrackerStore()
     private let recordStore = TrackerRecordStore()
-    
+    private var containerView: UIView?
     private let defaultCategoryTitle = "Все трекеры"
     private var datePicker: UIDatePicker?
     /*private var categories: [TrackerCategory] = []*/
@@ -31,7 +31,8 @@ class ViewController: UIViewController {
             frame: .zero,
             collectionViewLayout: layout
         )
-        collectionView.backgroundColor = .white
+        collectionView.backgroundColor = .ypWhite
+        
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.register(TrackersCollectionViewCell.self, forCellWithReuseIdentifier: "Cell")
         return collectionView
@@ -60,13 +61,22 @@ class ViewController: UIViewController {
     private let searchTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = NSLocalizedString("search_placeholder", comment: "")
+        let placeholderText = NSLocalizedString("search_placeholder", comment: "")
+        let attributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor.ypColorForPlaceholder
+        ]
+        textField.attributedPlaceholder = NSAttributedString(
+            string: placeholderText,
+            attributes: attributes
+        )
+        /*textField.textColor = .redLinearGradient*/
         textField.layer.cornerRadius = 12
         textField.backgroundColor = .ypGray
         textField.translatesAutoresizingMaskIntoConstraints = false
         
         let searchIcon = UIImage(systemName: "magnifyingglass")
         let searchImageView = UIImageView(image: searchIcon)
-        searchImageView.tintColor = .gray
+        searchImageView.tintColor = .ypColorForPlaceholder
         searchImageView.contentMode = .scaleAspectFit
         let leftViewContainer = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 30))
         searchImageView.frame = CGRect(x: 12, y: 5, width: 20, height: 20)
@@ -117,7 +127,7 @@ class ViewController: UIViewController {
         let filter = UIButton(type: .system)
         /*filter.setTitle("Фильтры", for: .normal)*/
         filter.setTitle(NSLocalizedString("filters_button", comment: ""), for: .normal)
-        filter.setTitleColor(.ypWhite, for: .normal)
+        filter.setTitleColor(.ypWhiteButtonFilter, for: .normal)
         filter.titleLabel?.font = .systemFont(ofSize: 17, weight: .regular)
         filter.titleLabel?.textAlignment = .center
         filter.layer.cornerRadius = 16
@@ -129,7 +139,7 @@ class ViewController: UIViewController {
         return filter
     }()
     
-// MARK: - UI Методы
+    // MARK: - UI Методы
     
     
     private func updatePlaceholderVisibility() {
@@ -168,6 +178,23 @@ class ViewController: UIViewController {
             placeholderFilterImageView.isHidden = true
             placeholderFilterLabel.isHidden = true
         }
+    }
+    
+    private func setupInitialData() {
+        let existingTrackers = trackerStore.fetchAll()
+        guard existingTrackers.isEmpty else { return }
+        
+        let testTrackers = Tracker(
+            id: UUID(),
+            label: "Йога",
+            color: "ypLightGreen",
+            emoji: "🧘",
+            timetable: TrackerSchedule(days: [.monday, .wednesday, .friday, .saturday, .sunday, .tuesday, .thursday]),
+            category: nil
+        )
+        
+        trackerStore.save(testTrackers)
+        
     }
     
     private func updateDatePicker(for filter: String) {
@@ -214,7 +241,7 @@ class ViewController: UIViewController {
             return TrackerCategory(title: category.title, trackers: filtered)
         }.filter { !$0.trackers.isEmpty }
     }
-
+    
     private func updateFilterButtonAppearance() {
         let hasTrackers = !trackers.isEmpty
         let isFilterActive = currentFilter != "Все трекеры"
@@ -228,12 +255,12 @@ class ViewController: UIViewController {
         // Показываем кнопку, если есть трекеры
         filterButton.isHidden = false
         if isFilterActive {
-                filterButton.backgroundColor = .ypPink
-                filterButton.setTitleColor(.ypWhite, for: .normal)
-            } else {
-                filterButton.backgroundColor = .ypBlue
-                filterButton.setTitleColor(.ypWhite, for: .normal)
-            }
+            filterButton.backgroundColor = .ypPink
+            filterButton.setTitleColor(.ypWhiteButtonFilter, for: .normal)
+        } else {
+            filterButton.backgroundColor = .ypBlue
+            filterButton.setTitleColor(.ypWhiteButtonFilter, for: .normal)
+        }
     }
     private func showFilterButtonIfNeeded() {
         DispatchQueue.main.async { [weak self] in
@@ -256,9 +283,9 @@ class ViewController: UIViewController {
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-            super.viewWillDisappear(animated)
+        super.viewWillDisappear(animated)
         analyticsService.sendEvent(event: "close", screen: "Main")
-        }
+    }
     
     private func setupBindings() {
         trackerStore.onUpdate = { [weak self] in
@@ -269,7 +296,7 @@ class ViewController: UIViewController {
         }
     }
     
-    private func loadData() {
+    /*private*/ func loadData() {
         
         let allTrackers = trackerStore.fetchAll()
         let allRecords = recordStore.fetchAll()
@@ -317,43 +344,119 @@ class ViewController: UIViewController {
             }
         }
         allCategories = groupCategories
-        updateTrackersForCurrentDate()
-        if currentFilter == "Завершенные" || currentFilter == "Не завершенные" {
-                applyFilter(currentFilter)
-            }
+        /*updateTrackersForCurrentDate()
+         if currentFilter == "Завершенные" || currentFilter == "Не завершенные" {
+         applyFilter(currentFilter)
+         }*/
+        applyFilter(currentFilter)
         showFilterButtonIfNeeded()
+        setupInitialData()
     }
+    
+    /*private func applyFilter(_ filter: String) {
+     currentFilter = filter
+     updateDatePicker(for: filter)
+     /*let allTrackers = trackerStore.fetchAll()
+      let groupedCategories = groupTrackersByCategory(allTrackers)*/
+     let groupedCategories = allCategories
+     
+     if filter == "Трекеры на сегодня" {
+     currentDate = Date()
+     datePicker?.setDate(currentDate, animated: true)
+     datePicker?.tintColor = .ypBlue
+     updateTrackersForCurrentDate()
+     return
+     } else {
+     datePicker?.tintColor = nil
+     }
+     
+     switch filter {
+     case "Завершенные":
+     filteredCategories = filterTrackers(groupedCategories, byStatus: "Завершенные")
+     case "Не завершенные":
+     filteredCategories = filterTrackers(groupedCategories, byStatus: "Не завершенные")
+     default:
+     filteredCategories = groupedCategories
+     }
+     collectionView.reloadData()
+     updatePlaceholderVisibility()
+     updatePlaceholderFilterVisibility()
+     updateFilterButtonAppearance()
+     }*/
     
     private func applyFilter(_ filter: String) {
         currentFilter = filter
-        updateDatePicker(for: filter)
-        /*let allTrackers = trackerStore.fetchAll()
-        let groupedCategories = groupTrackersByCategory(allTrackers)*/
-        let groupedCategories = allCategories
+        /* updateDatePicker(for: filter)*/
+        print("🔍 applyFilter: \(filter)")
+        print("📅 currentDate: \(currentDate)")
+        // Получаем актуальные категории с учетом текущей даты
+        let groupedCategories = getCategoriesForCurrentDate()
         
-        if filter == "Трекеры на сегодня" {
-            currentDate = Date()
-            datePicker?.setDate(currentDate, animated: true)
-            datePicker?.tintColor = .ypBlue
-            updateTrackersForCurrentDate()
-            return
-        } else {
-            datePicker?.tintColor = nil
-        }
-        
+        // Применяем фильтр статуса
         switch filter {
         case "Завершенные":
-            filteredCategories = filterTrackers(groupedCategories, byStatus: "Завершенные")
+            filteredCategories = filterTrackersByStatus(groupedCategories, status: .completed)
         case "Не завершенные":
-            filteredCategories = filterTrackers(groupedCategories, byStatus: "Не завершенные")
+            filteredCategories = filterTrackersByStatus(groupedCategories, status: .incomplete)
         default:
+            // "Все трекеры" или "Трекеры на сегодня"
             filteredCategories = groupedCategories
         }
-            collectionView.reloadData()
-            updatePlaceholderVisibility()
-            updatePlaceholderFilterVisibility()
+        trackers = filteredCategories.flatMap { $0.trackers }
+        collectionView.reloadData()
+        updatePlaceholderVisibility()
+        updatePlaceholderFilterVisibility()
         updateFilterButtonAppearance()
     }
+    
+    
+    private func getCategoriesForCurrentDate() -> [TrackerCategory] {
+        let weekdayNumber = Calendar.current.component(.weekday, from: currentDate)
+        
+        return allCategories.map { category in
+            let filteredTrackers = category.trackers.filter { tracker in
+                tracker.timetable.days.contains { $0.numberInCalendar == weekdayNumber }
+            }
+            return TrackerCategory(title: category.title, trackers: filteredTrackers)
+        }.filter { !$0.trackers.isEmpty }
+    }
+    
+    
+    enum TrackerStatus {
+        case completed
+        case incomplete
+    }
+    
+    private func filterTrackersByStatus(_ categories: [TrackerCategory], status: TrackerStatus) -> [TrackerCategory] {
+        // Получаем ID завершенных трекеров на текущую дату
+        let completedIds = Set(completedTrackers
+            .filter { Calendar.current.isDate($0.date, inSameDayAs: currentDate) }
+            .map { $0.trackerId })
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        print("""
+            =================================
+            📅 ТЕКУЩАЯ ДАТА: \(dateFormatter.string(from: currentDate))
+            📊 Всего записей: \(completedTrackers.count)
+            ✅ Завершенных на эту дату: \(completedIds.count)
+            🆔 ID: \(completedIds)
+            =================================
+            """)
+        
+        return categories.map { category in
+            let filtered = category.trackers.filter { tracker in
+                switch status {
+                case .completed:
+                    return completedIds.contains(tracker.id)
+                case .incomplete:
+                    return !completedIds.contains(tracker.id)
+                }
+            }
+            return TrackerCategory(title: category.title, trackers: filtered)
+        }.filter { !$0.trackers.isEmpty }
+    }
+    
     private func groupTrackersByCategory(_ trackers: [Tracker]) -> [TrackerCategory] {
         return trackers.reduce(into: [TrackerCategory]()) { result, tracker in
             let categoryTitle = tracker.category?.title ?? "Без категории"
@@ -364,6 +467,18 @@ class ViewController: UIViewController {
                 result.append(TrackerCategory(title: categoryTitle, trackers: [tracker]))
             }
         }
+    }
+    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
+        currentDate = sender.date
+        
+        // Если был активен фильтр "Трекеры на сегодня", сбрасываем его
+        if currentFilter == "Трекеры на сегодня" {
+            currentFilter = "Все трекеры"
+            datePicker?.tintColor = nil
+        }
+        
+        // Переприменяем текущий фильтр с новой датой
+        applyFilter(currentFilter)
     }
     
     
@@ -433,41 +548,46 @@ class ViewController: UIViewController {
         navigationItem.leftBarButtonItem = addButton
         
         let datePicker = UIDatePicker()
+        datePicker.overrideUserInterfaceStyle = .light
         datePicker.datePickerMode = .date
         datePicker.calendar = .current
         datePicker.preferredDatePickerStyle = .compact
+        
+        
         datePicker.locale = Locale(identifier: "ru_RU")
+        /*datePicker.backgroundColor = .clear*/
+        datePicker.layer.cornerRadius = 8
+        datePicker.clipsToBounds = true
+        
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         self.datePicker = datePicker
+        
+        let containerView = UIView()
+        self.containerView = containerView
+        containerView.backgroundColor = .ypWhite
+        containerView.addSubview(datePicker)
+        datePicker.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            datePicker.topAnchor.constraint(equalTo: containerView.topAnchor),
+            datePicker.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
+            datePicker.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
+            datePicker.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
+        ])
+    
+
         let calendar = Calendar.current
         var components = DateComponents()
         components.day = 17
         components.month = 7
         components.year = 2026
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: containerView)
     }
     
     // MARK: - Настройка данных
 
     
     // MARK: - Действия
-    @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
-        
-        currentDate = sender.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        
-        /*let formattedDate = dateFormatter.string(from: currentDate)*/
-        if currentFilter == "Трекеры на сегодня" {
-                currentFilter = "Все трекеры"
-            }
-        updateTrackersForCurrentDate()
-        
-        if currentFilter == "Завершенные" || currentFilter == "Не завершенные" {
-                applyFilter(currentFilter)
-            }
-    }
     
     @objc private func addTrackerTapped() {
         
@@ -807,6 +927,7 @@ extension ViewController: TrackersCollectionViewCellDelegate {
                 trackerId: trackerId,
                 date: selectedDate)
             recordStore.delete(record)
+            
 
         } else {
             // Отмечаем выполнение

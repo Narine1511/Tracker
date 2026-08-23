@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AppMetrica</key>
+	<string>0264b2c4-5d8e-4b7b-a5ac-9e3e88f64b38</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIImageName</key>

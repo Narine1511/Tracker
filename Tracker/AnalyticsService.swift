@@ -9,16 +9,14 @@ import AppMetricaCore
 
 struct AnalyticsService {
     static func activate() {
+        print("🔵 1. AnalyticsService.activate() - НАЧАЛО")
+                
+                print("🔵 2. Создаю configuration с API-ключом: 322d109b-550a-4a77-813c-ee65e320327a")
         guard let configuration = AppMetricaConfiguration(apiKey: "322d109b-550a-4a77-813c-ee65e320327a") else { return }
 
         AppMetrica.activate(with: configuration)
     }
 
-    func report(event: String, params : [String : Any]) {
-        AppMetrica.reportEvent(name: event, parameters: params, onFailure: { error in
-            print("REPORT ERROR: %@", error.localizedDescription)
-        })
-    }
     func sendEvent(event: String, screen: String, item: String? = nil) {
             var params: [String: Any] = [
                 "event": event,
@@ -29,4 +27,11 @@ struct AnalyticsService {
             }
             report(event: "user_action", params: params)
         }
+    
+    func report(event: String, params : [String : Any]) {
+        AppMetrica.reportEvent(name: event, parameters: params, onFailure: { error in
+            print("REPORT ERROR: %@", error.localizedDescription)
+        })
+    }
+    
     }

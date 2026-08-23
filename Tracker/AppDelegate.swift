@@ -44,11 +44,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        AnalyticsService.activate()
         window = UIWindow()
         window?.rootViewController = ViewController()
         window?.makeKeyAndVisible()
         
-        AnalyticsService.activate()
+        print("🔵 AppDelegate: AnalyticsService.activate() выполнен")
         
         return true
     }

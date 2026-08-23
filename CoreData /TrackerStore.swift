@@ -6,7 +6,7 @@
 //
 
 import CoreData
-final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
+final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate, TrackerStoreProtocol {
     
     private let context: NSManagedObjectContext
     var onUpdate: (() -> Void)?

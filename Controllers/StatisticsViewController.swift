@@ -68,35 +68,45 @@ final class StatisticsViewController: UIViewController {
         setupBindings()
         
         NotificationCenter.default.addObserver(
-                self,
-                selector: #selector(loadStatistics),
-                name: NSNotification.Name("UpdateStatistics"),
-                object: nil
-            )
-        }
-
-        deinit {
-            NotificationCenter.default.removeObserver(self)
+            self,
+            selector: #selector(loadStatistics),
+            name: NSNotification.Name("UpdateStatistics"),
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("🟢 viewWillAppear вызван")
+        setupUI()
+        setupCollectionView()
+        setupBindings()
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(loadStatistics),
+            name: NSNotification.Name("UpdateStatistics"),
+            object: nil
+        )
         loadStatistics()
     }
     
     private func setupBindings() {
-            recordStore.onUpdate = { [weak self] in
-                print("📢 RecordStore обновился!")
-                self?.loadStatistics()
-            }
-            
-            trackerStore.onUpdate = { [weak self] in
-                print("📢 TrackerStore обновился!")
-                self?.loadStatistics()
-            }
+        recordStore.onUpdate = { [weak self] in
+            print("📢 RecordStore обновился!")
+            self?.loadStatistics()
         }
+        
+        trackerStore.onUpdate = { [weak self] in
+            print("📢 TrackerStore обновился!")
+            self?.loadStatistics()
+        }
+    }
     
     private func setupUI() {
         view.addSubview(titleLabel)
@@ -146,60 +156,97 @@ final class StatisticsViewController: UIViewController {
         
         // Лучший период (месяц с наибольшим количеством выполнений)
         let calendar = Calendar.current
-                var monthCounts: [String: Int] = [:]
-                for record in allRecords {
-                    let monthKey = calendar.component(.month, from: record.date)
-                    let yearKey = calendar.component(.year, from: record.date)
-                    let key = "\(yearKey)-\(monthKey)"
-                    monthCounts[key, default: 0] += 1
-                }
-                let bestPeriod = monthCounts.values.max() ?? 0
+        var monthCounts: [String: Int] = [:]
+        for record in allRecords {
+            let monthKey = calendar.component(.month, from: record.date)
+            let yearKey = calendar.component(.year, from: record.date)
+            let key = "\(yearKey)-\(monthKey)"
+            monthCounts[key, default: 0] += 1
+        }
+        let bestPeriod = monthCounts.values.max() ?? 0
         
         // Дней без пропусков (текущая непрерывная цепочка)
         let streak = calculateStreak(from: allRecords)
-                
-                statistics = [
-                    StatisticsItem(count: uniqueTrackers, title: "Лучший период"),
-                    StatisticsItem(count: totalCompletions, title: "Трекеров завершено"),
-                    StatisticsItem(count: bestPeriod, title: "Идеальные дни"),
-                    StatisticsItem(count: streak, title: "Среднее значение")
-                ]
-                
-                updateUI()
-            }
-    
-    private func calculateStreak(from records: [TrackerRecord]) -> Int {
-            guard !records.isEmpty else { return 0 }
-            
-            let calendar = Calendar.current
-            let sortedDates = Set(records.map { calendar.startOfDay(for: $0.date) }).sorted()
-            
-            var streak = 0
-            var currentDate = Date()
-            
-            while true {
-                let startOfDay = calendar.startOfDay(for: currentDate)
-                if sortedDates.contains(startOfDay) {
-                    streak += 1
-                    currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
-                } else {
-                    break
-                }
-            }
-        return streak
-            }
-            
-            private func updateUI() {
-                let hasData = !statistics.isEmpty
-                placeholderImageView.isHidden = hasData
-                placeholderLabel.isHidden = hasData
-                collectionView.isHidden = !hasData
-                
-                if hasData {
-                    collectionView.reloadData()
-                }
-            }
+        
+        statistics = [
+            StatisticsItem(count: uniqueTrackers, title: "Лучший период"),
+            StatisticsItem(count: totalCompletions, title: "Трекеров завершено"),
+            StatisticsItem(count: bestPeriod, title: "Идеальные дни"),
+            StatisticsItem(count: streak, title: "Среднее значение")
+        ]
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            print("🟣 Обновляем UI на главном потоке")
+            self.updateUI()
         }
+    }
+    
+    /* private func calculateStreak(from records: [TrackerRecord]) -> Int {
+     guard !records.isEmpty else { return 0 }
+     
+     let calendar = Calendar.current
+     let sortedDates = Set(records.map { calendar.startOfDay(for: $0.date) }).sorted()
+     
+     var streak = 0
+     var currentDate = Date()
+     
+     while true {
+     let startOfDay = calendar.startOfDay(for: currentDate)
+     if sortedDates.contains(startOfDay) {
+     streak += 1
+     currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
+     } else {
+     break
+     }
+     }
+     return streak
+     }
+     
+     private func updateUI() {
+     let hasData = !statistics.isEmpty
+     placeholderImageView.isHidden = hasData
+     placeholderLabel.isHidden = hasData
+     collectionView.isHidden = !hasData
+     
+     if hasData {
+     collectionView.reloadData()
+     }
+     }*/
+    private func calculateStreak(from records: [TrackerRecord]) -> Int {
+        guard !records.isEmpty else { return 0 }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let recordDates = Set(records.map { calendar.startOfDay(for: $0.date) })
+        
+        // Проверяем, есть ли запись сегодня
+        var currentDate = today
+        var streak = 0
+        
+        // Идем назад, пока есть записи
+        while recordDates.contains(currentDate) {
+            streak += 1
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: currentDate) else {
+                break
+            }
+            currentDate = previousDay
+        }
+        
+        return streak
+    }
+    private func updateUI() {
+        let hasData = !statistics.isEmpty
+        placeholderImageView.isHidden = hasData
+        placeholderLabel.isHidden = hasData
+        collectionView.isHidden = !hasData
+        
+        if hasData {
+            collectionView.reloadData()
+        }
+    }
+}
+    
 struct StatisticsItem {
     let count: Int
     let title: String

@@ -6,10 +6,39 @@
 //
 
 import XCTest
+import SnapshotTesting
 @testable import Tracker
 
 final class TrackerTests: XCTestCase {
 
+    
+    @MainActor
+    func testViewController() {
+        
+        let testTrackers = [
+                
+                    Tracker(
+                        id: UUID(),
+                        label: "Йога",
+                        color: "ypLightGreen",
+                        emoji: "🧘",
+                        timetable: TrackerSchedule(days: [.monday, .wednesday, .friday, .saturday, .sunday, .tuesday, .thursday]),
+                        category: nil
+                    )
+                ]
+        let mockStore = MockTrackerStore()
+        mockStore.setMockData(testTrackers)
+        
+        let vc = ViewController()
+        vc.trackerStore = mockStore
+        
+        vc.loadData()
+        
+        assertSnapshot(of: vc, as: .image)
+      
+    }
+    
+    
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
     }
