@@ -83,16 +83,7 @@ final class StatisticsViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("🟢 viewWillAppear вызван")
-        setupUI()
-        setupCollectionView()
-        setupBindings()
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(loadStatistics),
-            name: NSNotification.Name("UpdateStatistics"),
-            object: nil
-        )
+
         loadStatistics()
     }
     
@@ -151,8 +142,15 @@ final class StatisticsViewController: UIViewController {
         }
         
         let totalCompletions = allRecords.count
+        statistics = [
+            StatisticsItem(count: totalCompletions, title: "Трекеров завершено")]
+        
+        DispatchQueue.main.async { [weak self] in
+                self?.updateUI()
+            }
+        
         // Выполнение уникальных трекеров
-        let uniqueTrackers = Set(allRecords.map { $0.trackerId}).count
+        /*  let uniqueTrackers = Set(allRecords.map { $0.trackerId}).count
         
         // Лучший период (месяц с наибольшим количеством выполнений)
         let calendar = Calendar.current
@@ -179,40 +177,10 @@ final class StatisticsViewController: UIViewController {
             guard let self = self else { return }
             print("🟣 Обновляем UI на главном потоке")
             self.updateUI()
-        }
+        }*/
     }
     
-    /* private func calculateStreak(from records: [TrackerRecord]) -> Int {
-     guard !records.isEmpty else { return 0 }
-     
-     let calendar = Calendar.current
-     let sortedDates = Set(records.map { calendar.startOfDay(for: $0.date) }).sorted()
-     
-     var streak = 0
-     var currentDate = Date()
-     
-     while true {
-     let startOfDay = calendar.startOfDay(for: currentDate)
-     if sortedDates.contains(startOfDay) {
-     streak += 1
-     currentDate = calendar.date(byAdding: .day, value: -1, to: currentDate)!
-     } else {
-     break
-     }
-     }
-     return streak
-     }
-     
-     private func updateUI() {
-     let hasData = !statistics.isEmpty
-     placeholderImageView.isHidden = hasData
-     placeholderLabel.isHidden = hasData
-     collectionView.isHidden = !hasData
-     
-     if hasData {
-     collectionView.reloadData()
-     }
-     }*/
+   
     private func calculateStreak(from records: [TrackerRecord]) -> Int {
         guard !records.isEmpty else { return 0 }
         

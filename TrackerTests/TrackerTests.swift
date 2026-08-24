@@ -13,7 +13,7 @@ final class TrackerTests: XCTestCase {
 
     
     @MainActor
-    func testViewController() {
+    func testViewControllerLight() {
         
         let testTrackers = [
                 
@@ -34,7 +34,36 @@ final class TrackerTests: XCTestCase {
         
         vc.loadData()
         
-        assertSnapshot(of: vc, as: .image)
+        assertSnapshot(of: vc, as: .image(traits: .init(userInterfaceStyle: .light)),
+                       record: false
+        )
+      
+    }
+    
+    func testViewControllerDark() {
+        
+        let testTrackers = [
+                
+                    Tracker(
+                        id: UUID(),
+                        label: "Йога",
+                        color: "ypLightGreen",
+                        emoji: "🧘",
+                        timetable: TrackerSchedule(days: [.monday, .wednesday, .friday, .saturday, .sunday, .tuesday, .thursday]),
+                        category: nil
+                    )
+                ]
+        let mockStore = MockTrackerStore()
+        mockStore.setMockData(testTrackers)
+        
+        let vc = ViewController()
+        vc.trackerStore = mockStore
+        
+        vc.loadData()
+        
+        assertSnapshot(of: vc, as: .image(traits: .init(userInterfaceStyle: .dark)),
+                       record: false
+        )
       
     }
     

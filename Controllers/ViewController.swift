@@ -548,7 +548,6 @@ class ViewController: UIViewController {
         navigationItem.leftBarButtonItem = addButton
         
         let datePicker = UIDatePicker()
-        datePicker.overrideUserInterfaceStyle = .light
         datePicker.datePickerMode = .date
         datePicker.calendar = .current
         datePicker.preferredDatePickerStyle = .compact
@@ -561,18 +560,6 @@ class ViewController: UIViewController {
         
         datePicker.addTarget(self, action: #selector(datePickerValueChanged(_:)), for: .valueChanged)
         self.datePicker = datePicker
-        
-        let containerView = UIView()
-        self.containerView = containerView
-        containerView.backgroundColor = .ypWhite
-        containerView.addSubview(datePicker)
-        datePicker.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            datePicker.topAnchor.constraint(equalTo: containerView.topAnchor),
-            datePicker.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-            datePicker.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
-            datePicker.trailingAnchor.constraint(equalTo: containerView.trailingAnchor)
-        ])
     
 
         let calendar = Calendar.current
@@ -581,7 +568,7 @@ class ViewController: UIViewController {
         components.month = 7
         components.year = 2026
         
-        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: containerView)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: datePicker)
     }
     
     // MARK: - Настройка данных
@@ -941,7 +928,8 @@ extension ViewController: TrackersCollectionViewCellDelegate {
         
         let savedFilter = currentFilter
                 let savedDate = currentDate
-        
+        let allRecords = recordStore.fetchAll()
+            print("📦 Всего записей после действия: \(allRecords.count)")
         NotificationCenter.default.post(name: NSNotification.Name("UpdateStatistics"), object: nil)
         
         
