@@ -14,6 +14,7 @@ final class StatisticsViewController: UIViewController {
     private let trackerStore = TrackerStore()
     
     
+    
     private let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         let collectionView = UICollectionView(
@@ -181,7 +182,7 @@ final class StatisticsViewController: UIViewController {
     }
     
    
-    private func calculateStreak(from records: [TrackerRecord]) -> Int {
+    /* private func calculateStreak(from records: [TrackerRecord]) -> Int {
         guard !records.isEmpty else { return 0 }
         
         let calendar = Calendar.current
@@ -202,7 +203,7 @@ final class StatisticsViewController: UIViewController {
         }
         
         return streak
-    }
+    }*/
     private func updateUI() {
         let hasData = !statistics.isEmpty
         placeholderImageView.isHidden = hasData
