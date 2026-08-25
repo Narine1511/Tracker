@@ -134,7 +134,7 @@ final class StatisticsViewController: UIViewController {
         let allRecords = recordStore.fetchAll()
         print("📦 Записей в Core Data: \(allRecords.count)")
         let allTrackers = trackerStore.fetchAll()
-        
+        print("📦 Записей в recordStore: \(allRecords.count)")
         guard !allRecords.isEmpty else {
             print("❌ НЕТ ЗАПИСЕЙ!")
             statistics = []

@@ -36,7 +36,9 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
     
     // Получить все данные
     func fetchAll() -> [TrackerRecord] {
+        try? fetchedResultsController.performFetch()
         let entities = fetchedResultsController.fetchedObjects ?? []
+        print("🔍 FRC вернул \(entities.count) записей")
         return entities.map { convertModel($0) }
     }
     
@@ -122,5 +124,11 @@ final class TrackerRecordStore: NSObject,NSFetchedResultsControllerDelegate {
             trackerId: entity.trackerId ?? UUID(),
             date: entity.date ?? Date()
         )
+    }
+}
+extension TrackerRecordStore {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        print("🔄 FRC заметил изменения!")
+        onUpdate?()
     }
 }

@@ -41,7 +41,7 @@ class ViewController: UIViewController {
         
         collectionView.dataSource = self
         collectionView.delegate = self
-        
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 100, right: 0)
         collectionView.register(
             SectionHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
@@ -255,8 +255,8 @@ class ViewController: UIViewController {
         // Показываем кнопку, если есть трекеры
         filterButton.isHidden = false
         if isFilterActive {
-            filterButton.backgroundColor = .ypPink
-            filterButton.setTitleColor(.ypWhiteButtonFilter, for: .normal)
+            filterButton.backgroundColor = .ypBlue
+            filterButton.setTitleColor(.ypSoftPink, for: .normal)
         } else {
             filterButton.backgroundColor = .ypBlue
             filterButton.setTitleColor(.ypWhiteButtonFilter, for: .normal)
@@ -386,12 +386,19 @@ class ViewController: UIViewController {
     
     private func applyFilter(_ filter: String) {
         currentFilter = filter
-        /* updateDatePicker(for: filter)*/
+        updateDatePicker(for: filter)
         print("🔍 applyFilter: \(filter)")
         print("📅 currentDate: \(currentDate)")
         // Получаем актуальные категории с учетом текущей даты
-        let groupedCategories = getCategoriesForCurrentDate()
+        /* let groupedCategories = getCategoriesForCurrentDate()*/
         
+        
+        let groupedCategories: [TrackerCategory]
+            if filter == "Все трекеры" {
+                groupedCategories = allCategories
+            } else {
+                groupedCategories = getCategoriesForCurrentDate()
+            }
         // Применяем фильтр статуса
         switch filter {
         case "Завершенные":
@@ -471,12 +478,12 @@ class ViewController: UIViewController {
     @objc private func datePickerValueChanged(_ sender: UIDatePicker) {
         currentDate = sender.date
         
-        // Если был активен фильтр "Трекеры на сегодня", сбрасываем его
+        /*   // Если был активен фильтр "Трекеры на сегодня", сбрасываем его
         if currentFilter == "Трекеры на сегодня" {
             currentFilter = "Все трекеры"
             datePicker?.tintColor = nil
         }
-        
+        */
         // Переприменяем текущий фильтр с новой датой
         applyFilter(currentFilter)
     }
@@ -923,13 +930,13 @@ extension ViewController: TrackersCollectionViewCellDelegate {
                 trackerId: trackerId,
                 date: selectedDate)
             recordStore.save(record)
-            
+            print("💾 Запись СОХРАНЕНА в recordStore")
         }
         
         let savedFilter = currentFilter
                 let savedDate = currentDate
         let allRecords = recordStore.fetchAll()
-            print("📦 Всего записей после действия: \(allRecords.count)")
+            print("Всего записей после действия: \(allRecords.count)")
         NotificationCenter.default.post(name: NSNotification.Name("UpdateStatistics"), object: nil)
         
         

@@ -162,7 +162,7 @@ final class EditTrackerController: UIViewController {
         emojiesView.delegate = self
         
         
-        let count = trackerRecordCount
+        let count = recordCount
         let text = String.localizedStringWithFormat(NSLocalizedString("numberOfDays", comment: ""), count)
         countLabel.text = text
         
