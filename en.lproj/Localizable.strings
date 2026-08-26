@@ -1,0 +1,18 @@
+/* 
+  Localizable.strings
+  Tracker
+
+  Created by Наринэ  Овсепян on 13.08.2026.
+  
+*/
+"trackers_label" = "Trackers";
+"trackers_title" = "Trackers";
+"statistics_title" = "Statistics";
+"filters_button" = "Filters";
+"search_placeholder" = "Search";
+"empty_message" = "What will we track?";
+"no_results" = "No results found";
+"days_count" = "%d days";
+"day_count" = "%d day";
+"days" = "days";
+"day" = "day";

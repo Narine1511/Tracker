@@ -6,7 +6,7 @@
 //
 
 import CoreData
-final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
+final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate, TrackerStoreProtocol {
     
     private let context: NSManagedObjectContext
     var onUpdate: (() -> Void)?
@@ -55,7 +55,7 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
         return entities.map { convertModel($0)}
     }
     
- /*   // Изменить трекер
+    // Изменить трекер
     func update(_ tracker: Tracker) throws {
         let request = TrackerCoreData.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", tracker.id as CVarArg)
@@ -67,8 +67,8 @@ final class TrackerStore: NSObject, NSFetchedResultsControllerDelegate {
             userInfo: [NSLocalizedDescriptionKey: "Tracker not found"])
         }
         updateEntity(entity, with: tracker)
-        try AppDelegate.shared.saveContext()
-    }*/
+        AppDelegate.shared.saveContext()
+    }
     
     // Удалить трекер
     func delete(_ tracker: Tracker) throws {

@@ -22,6 +22,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
     private var trackerId: UUID?
     private var isCompleted: Bool = false
     private var completionCount: Int = 0
+    private var trackerColor: UIColor = .ypLightGreen
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -53,7 +54,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         
         // Настройка заголовка
         textLabel.font = UIFont.systemFont(ofSize: 12, weight: .medium)
-        textLabel.textColor = .ypWhite
+        textLabel.textColor = .ypWhiteButtonFilter
         colorView.addSubview(textLabel)
         textLabel.translatesAutoresizingMaskIntoConstraints = false
         
@@ -115,24 +116,31 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
         self.trackerId = tracker.id
         self.isCompleted = isCompleted
         self.completionCount = count
+        trackerColor = UIColor(named: tracker.color) ?? .ypLightGreen
         
         contentView.backgroundColor = .ypWhite
-        colorView.backgroundColor = UIColor(named: tracker.color) ?? .ypGreen
+        colorView.backgroundColor = UIColor(named: tracker.color) ?? .ypLightGreen
         emoji.text = tracker.emoji
         textLabel.text = tracker.label
-        textLabel.textColor = .ypWhite
-        countLabel.text = "\(count) дней"
+        textLabel.textColor = .ypWhiteButtonFilter
+        let daysText = String.localizedStringWithFormat(
+                NSLocalizedString("numberOfDays", comment: ""),
+                count
+            )
+            countLabel.text = daysText
         
-        updateButton()
+        updateButton(with: trackerColor)
         
     }
-    private func updateButton() {
+    private func updateButton(with color: UIColor) {
         if isCompleted {
             let image = UIImage(named: "button_ checkmark")
             complitebButton.setImage(image, for: .normal)
+            complitebButton.tintColor = color
         } else {
             let image = UIImage(named: "buttonCompleted")
             complitebButton.setImage(image, for: .normal)
+            complitebButton.tintColor = color
         }
     }
     
@@ -145,7 +153,7 @@ final class TrackersCollectionViewCell: UICollectionViewCell {
            isCompleted = !currentState
             completionCount += isCompleted ? 1 : -1
             countLabel.text = "\(completionCount) дней"
-            updateButton()
+            updateButton(with: trackerColor)
         }
     }
     
